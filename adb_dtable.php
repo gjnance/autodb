@@ -1,4 +1,3 @@
-
 <?
 // adb_dtable.php - Output a table of data. Expects the following to be defined:
 //
@@ -40,7 +39,7 @@ foreach ($fields as $field) {
 		continue;
 
 	// Is the data being sorted by this column already?
-	$bSortcol = isset($qOrder) && eregi("^" . $field->name . "( DESC)?$", $qOrder);
+	$bSortcol = isset($qOrder) && preg_match("/^" . $field->name . "( DESC)?$/", $qOrder);
 	
 	// If displaying an interactive table, output an empty column for the link column
 	if ($bInteractive && $nCol++ == 0)
@@ -81,8 +80,7 @@ foreach ($fields as $field) {
 	$nCol++;
 }
 
-//$csvdata = ereg_replace(";$", "\n", $csvdata);
-$csvdata = ereg_replace(",$", "\n", $csvdata);
+$csvdata = preg_replace("/,$/", "\n", $csvdata);
 
 echo '</tr>';
 
@@ -121,7 +119,7 @@ foreach($data as $row) {
 			continue;
 
 		// Skip extra "_adbrel_" columns
-		if (ereg("^_adbrel_", $col))
+		if (preg_match("/^_adbrel_/", $col))
 			continue;
 
 		// Add value to CSV export data
@@ -153,8 +151,7 @@ foreach($data as $row) {
 		$nCol++;
 	}
 
-	//$csvdata = ereg_replace(";$", "\n", $csvdata);
-	$csvdata = ereg_replace(",$", "\n", $csvdata);
+	$csvdata = preg_replace("/,$/", "\n", $csvdata);
 	echo '</tr>';
 	$nRow++;
 }

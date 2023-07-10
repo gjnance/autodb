@@ -1,4 +1,3 @@
-
 <? include "adb_config.php"; ?>
 
 function Submit(bClear, bForceSelect) {
@@ -144,8 +143,12 @@ function HighlightRow(o)
 	pdiv = o.parentNode;
 
 	for(i=0; i<pdiv.childNodes.length; i++) {
-		pdiv.childNodes[i].style.background = '#FFFF99';
-		pdiv.childNodes[i].style.color = 'black';
+	    node = pdiv.childNodes[i];
+
+		if (node.style) {
+			pdiv.childNodes[i].style.background = '#FFFF99';
+			pdiv.childNodes[i].style.color = 'black';
+		}
 		pdiv.childNodes[i].selected = false;
 	}
 

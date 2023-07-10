@@ -1,4 +1,3 @@
-
 <?
 // Include configuration file (mostly database stuff)
 include "adb_config.php";
@@ -7,7 +6,7 @@ include "adb_config.php";
 include "adb_functions.php";
 
 // Make database connection
-$adb_dblink = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS);
+$adb_dblink = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS);
 
 // Report all errors and warnings
 error_reporting(E_ALL);
@@ -37,22 +36,22 @@ $t2 = $relrow['adb_t2'];
 
 // If the rule references data from a different server, make the connection
 if($relrow['adb_t2_remhost'] && $relrow['adb_t2_remuser'])
-	$rem_dblink = mysql_connect($relrow['adb_t2_remhost'], $relrow['adb_t2_remuser'], $relrow['adb_t2_rempass']);
+	$rem_dblink = mysqli_connect($relrow['adb_t2_remhost'], $relrow['adb_t2_remuser'], $relrow['adb_t2_rempass']);
 
 // Get last sort order and WHERE from preferences
 $qOrder = GetCachedVar($t2, 'order');
-$order = $qOrder ? ' ORDER BY ' . mysql_escape_string($qOrder) : '';
+$order = $qOrder ? ' ORDER BY ' . mysqli_escape_string($rem_dblink, $qOrder) : '';
 
 $qWhere = GetCachedVar($t2, 'where');
-if (get_magic_quotes_gpc() && $qWhere)
-	$qWhere = stripslashes($qWhere);
+//if (get_magic_quotes_gpc() && $qWhere)
+//	$qWhere = stripslashes($qWhere);
 
 // Strip "WHERE " if entered by the user
-$qWhere = eregi_replace("^WHERE *", "", $qWhere);
+$qWhere = preg_replace("/^WHERE */", "", $qWhere);
 
 // Append user's search text to the query
 $qWhere = $qWhere . ($qWhere ? " && " : "") .
-	mysql_escape_string($t2_dspcol) . " LIKE '" . mysql_escape_string($qValue) . "%'";
+	mysqli_escape_string($adb_dblink, $t2_dspcol) . " LIKE '" . mysqli_escape_string($adb_dblink, $qValue) . "%'";
 
 $where = $qWhere ? ' WHERE ' . $qWhere : '';
 
@@ -60,8 +59,8 @@ $where = $qWhere ? ' WHERE ' . $qWhere : '';
 $qLimit = "15";
 $limit = ($qLimit && $qLimit != 'all') ? ' LIMIT ' . intval($qLimit) : '';
 
-$query = "SELECT " . mysql_escape_string($t2_relcol) . "," . mysql_escape_string($t2_dspcol) . " " .
-	"FROM " . mysql_escape_string($t2) . $where . $order . $limit;
+$query = "SELECT " . mysqli_escape_string($adb_dblink, $t2_relcol) . "," . mysqli_escape_string($adb_dblink, $t2_dspcol) . " " .
+	"FROM " . mysqli_escape_string($adb_dblink, $t2) . $where . $order . $limit;
 
 $rows = DBQueryGetRows($query, isset($rem_dblink) ? $rem_dblink : $adb_dblink);
 

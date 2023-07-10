@@ -1,4 +1,3 @@
-
 <?
 // AutoDB - Allows a user to browse through a MySQL server's databases and their tables. Also provides a
 // rudimentary form for inserting data into any of the tables of the database
@@ -21,13 +20,15 @@ error_reporting(E_ALL);
 set_time_limit(60);
 
 // Make database connection
-$adb_dblink = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS);
+$adb_dblink = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS);
 
 // Start buffering output
 ob_start();
 
+$debug = false;
+
 // Diagnostic information
-if(0) {
+if ($debug) {
 	echo "POST:<br>\n";
 	html_print_r($_POST);
 	echo "GET: ";
@@ -47,7 +48,7 @@ $qLimit = GetCachedVar($qDBTable, 'limit', 100);
 $qWhere = GetCachedVar($qDBTable, 'where');
 $qOrder = GetCachedVar($qDBTable, 'order');
 $qTitle = GetVar('title');
-$qCols = split(",", GetVar('cols', '*'));
+$qCols = explode(",", GetVar('cols', '*'));
 $qExport = GetVar('export');
 $qS = GetVar('s');
 $reports = GetReports($qDBTable);
@@ -57,11 +58,11 @@ $bReport = isset($_GET['title']) ? TRUE : FALSE;
 
 // WARNING: This script is *INTENTIONALLY* unsafe to allow user to inject arbitrary SQL so that they can, for example,
 // enter something like "account_username like '%foo%'" without having it be changed to "... \'%foo\'",
-if (get_magic_quotes_gpc() && $qWhere)
-	$qWhere = stripslashes($qWhere);
+//if (get_magic_quotes_gpc() && $qWhere)
+//	$qWhere = stripslashes($qWhere);
 
 // Strip "WHERE " if entered by the user
-$qWhere = eregi_replace("^WHERE *", "", $qWhere);
+$qWhere = preg_replace("/^WHERE */", "", $qWhere);
 
 // If database was selected, get a list of available tables
 $db_tables = array();
@@ -103,15 +104,15 @@ if ($qDatabase && $qTable) {
 	$key_where = '';
 
 	foreach($fields as $field) {
-		if ($field->primary_key)
+		if ($field->flags & 2)
 			array_push($pkey_cols, $field->name);
 
 		// Check for date or time fields and reconstruct MySQL strings from component form fields
 		if (!isset($_POST['_adb_' . $field->name])) {
-			if (eregi("^(time|date|datetime|timestamp)", $field->type)) {
+			if (preg_match("/^(time|date|datetime|timestamp)/", $field->type)) {
 				$_POST['_adb_' . $field->name] = ConstructDateField($field->type, $field->name);
 			}
-			else if (eregi("^year", $field->type))
+			else if (preg_match("/^year/", $field->type))
 				$_POST['_adb_' . $field->name] = isset($_POST['_adb_' . $field->name . '_Y']) ?
 					$_POST['_adb_' . $field->name . '_Y'] : '';
 		}
@@ -148,9 +149,9 @@ if ($qS) {
 		// from the database to the user (for example, a password), only update values that have changed in the row.
 		$query = "SELECT * FROM " . $qDBTable . " WHERE " . $key_where . " LIMIT 1";
 
-		$row = mysql_fetch_assoc(mysql_query($query, $adb_dblink));
+		$row = mysqli_fetch_assoc(mysqli_query($adb_dblink, $query));
 
-		$query = 'UPDATE ' . mysql_escape_string($qDBTable) . ' SET ';
+		$query = 'UPDATE ' . mysqli_escape_string($adb_dblink, $qDBTable) . ' SET ';
 
 		$q_fields = '';
 
@@ -171,7 +172,7 @@ if ($qS) {
 					$q_fields .= $field->name . "=''";
 				// TODO: This is lame. Do something clever with password fields besides guessing based on the field name
 				// Perhaps allow a function to be selected from a drop down box or something?
-				else if (ereg("password", $field->name))
+				else if (preg_match("/password/", $field->name))
 					$q_fields .= $field->name . "=PASSWORD(" . my_esc($_POST["_adb_" . $field->name]) . ")";
 				else
 					$q_fields .= $field->name . "=" . my_esc($_POST["_adb_" . $field->name]);
@@ -206,18 +207,18 @@ if ($qS) {
 					           $_POST['_adb_' . $field->name . '_type_'] == "Empty")
 					$q_values .= "''";
 				// TODO: This is lame, allow something more clever
-				else if (eregi("password", $field->name))
+				else if (preg_match("/password/", $field->name))
 					$q_values .= "PASSWORD(" . my_esc($_POST["_adb_" . $field->name]) . ")";
 				else
 					$q_values .= my_esc($_POST["_adb_" . $field->name]);
 			}
 		}
 
-		$query = 'INSERT INTO ' . mysql_escape_string($qDBTable) . ' (' . $q_fields . ')' . ' VALUES (' . $q_values . ')';
+		$query = 'INSERT INTO ' . mysqli_escape_string($adb_dblink, $qDBTable) . ' (' . $q_fields . ')' . ' VALUES (' . $q_values . ')';
 	}
 
-	if ($query && !mysql_query($query, $adb_dblink))
-		$status = Error(mysql_error() . '<br>' . $query);
+	if ($query && !mysqli_query($adb_dblink, $query))
+		$status = Error(mysqli_error($adb_dblink) . '<br>' . $query);
 	else
 		$status = "<div class=\"green\">Record " . ($key_where && !$qCopyRow ? 'Updated' : 'Inserted') . "</div><p>";
 		
@@ -226,10 +227,10 @@ if ($qS) {
 		$qDBAction = "select";
 
 } else if ($qDeleteRow && $key_where) {
-	$query = 'DELETE FROM ' . mysql_escape_string($qDBTable) . " WHERE " . $key_where;
+	$query = 'DELETE FROM ' . mysqli_escape_string($adb_dblink, $qDBTable) . " WHERE " . $key_where;
 
-	if (!mysql_query($query, $adb_dblink))
-		$status = Error(mysql_error() . '<br>' . $query);
+	if (!mysqli_query($adb_dblink, $query))
+		$status = Error(mysqli_error($adb_dblink) . '<br>' . $query);
 	else
 		$status = "<div class=\"green\">Record Deleted</div><p>";
 
@@ -240,7 +241,7 @@ if ($qS) {
 if ($bReport) {
 	echo '<center><h1>' . (isset($qTitle) ? $qTitle : 'Report Untitled') . '</h1></center>';
 } else {
-	//include "adb_auth_banner.php";
+	include "adb_auth_banner.php";
 	include "adb_form.php";
 }
 
@@ -263,14 +264,14 @@ if ($qDBTable && $qDBAction == "insert") {
 			echo '<input type="hidden" name="_adbkeycol_' . $key_col . '" value="' .
 				htmlspecialchars($_POST['_adbkeycol_' . $key_col]) . '">';
 
-		$query = "SELECT * FROM " . mysql_escape_string($qDBTable) . " WHERE " . $key_where;
+		$query = "SELECT * FROM " . mysqli_escape_string($adb_dblink, $qDBTable) . " WHERE " . $key_where;
 
-		$result = mysql_query($query, $adb_dblink);
+		$result = mysqli_query($adb_dblink, $query);
 
-		if (mysql_num_rows($result) != 1)
-			die(Error("Wrong number of rows (" . mysql_num_rows($result) . ", need 1) to update entry<br>" . $query));
+		if (mysqli_num_rows($result) != 1)
+			die(Error("Wrong number of rows (" . mysqli_num_rows($result) . ", need 1) to update entry<br>" . $query));
 		else
-			$row = mysql_fetch_assoc($result);
+			$row = mysqli_fetch_assoc($result);
 	} else {
 		// Nothing to update
 		unset($row);
@@ -286,14 +287,14 @@ if ($qDBTable && $qDBAction == "insert") {
 
 	$query = "SELECT * FROM " . AUTODB_REL . " WHERE adb_t1 = " . my_esc($qDBTable) . "";
 
-	if(!($res = mysql_query($query, $adb_dblink)))
-		die(Error(mysql_error() . '<br>' . $query));
+	if(!($res = mysqli_query($adb_dblink, $query)))
+		die(Error(mysqli_error($adb_dblink) . '<br>' . $query));
 
 	// Array that will be returned mapping $qTable columns to related column data in other tables
 	$adb_rule_cols = array();
 
-	if ($rule_res = mysql_query($query, $adb_dblink))
-		while ($rule_row = mysql_fetch_assoc($rule_res))
+	if ($rule_res = mysqli_query($adb_dblink, $query))
+		while ($rule_row = mysqli_fetch_assoc($rule_res))
 			$adb_rule_cols[$rule_row['adb_t1_relcol']] = $rule_row;
 
 	$focus_field = '';
@@ -349,8 +350,8 @@ if ($qDBTable && $qDBAction == "insert") {
 
 		} else {
 
-			// If field cannot be null, set the background color of the input element(s) to red
-			$input_style = ($field->not_null ? 'background: #FFAAAA;' : '');
+			// If field cannot be null (NOT_NULL_FLAG), set the background color of the input element(s) to red
+			$input_style = ($field->flags & 1 ? 'background: #FFAAAA;' : '');
 
 			$value = htmlspecialchars((isset($row) ? $row[$field->name] :
 				(isset($field->def) ? $field->def : '')));
@@ -496,20 +497,20 @@ if ($qDBTable && $qDBAction == "insert") {
 	<p><div style="font-style: italic; background: #FFAAAA; border: 1px solid gray; padding: 2px; width: 182;">Input fields in red are required</div><p>
 
 	<input type="submit" value="<?=(isset($row) && !$qCopyRow ? 'Update' : 'Insert')?>"
-	       style="border: 1px solid #9933FF; height: 25px; width: 150px;">
+	       style="border: 1px solid #9933FF; height: 25px; width: 150px; cursor: pointer;">
 <?
 } else if ($qDBTable && ($qDBAction == "select" || $qDBAction == "export" || !$qDBAction)) {
 
 	// Build the query and execute it
 	$query = BuildQuery($joins, $where, $rcols);
-	$result = mysql_query($query, $adb_dblink);
+	$result = mysqli_query($adb_dblink, $query);
 
 	if (!$result)
-		die(Error(mysql_error() . '<br>' . $query));
+		die(Error(mysqli_error($adb_dblink) . '<br>' . $query));
 
 	// Output the table data
 	$data = array();
-	while ($row = mysql_fetch_assoc($result))
+	while ($row = mysqli_fetch_assoc($result))
 		array_push($data, $row);
 	
 	$bInteractive = !$bReport;
@@ -520,10 +521,11 @@ if ($qDBTable && $qDBAction == "insert") {
 	include "adb_dtable.php";
 
 	if ($qLimit && $qLimit != "all") {
-		$result = DBQuery("SELECT COUNT(*) FROM " . mysql_escape_string($qDBTable) .
+		$result = DBQuery("SELECT COUNT(*) FROM " . mysqli_escape_string($adb_dblink, $qDBTable) .
 			$joins . $where);
 
-		$nRowsTotal = mysql_result($result, 0, "COUNT(*)");
+		$row = mysqli_fetch_array($result);
+		$nRowsTotal = $row['COUNT(*)'];
 
 		if ($nRowsTotal > $nRow) {
 			$notshown = $nRowsTotal - $nRow;
@@ -553,14 +555,14 @@ if ($qDBTable && $qDBAction == "insert") {
 	<? } ?>
 
 	<?= isset($focus_field) && $focus_field ?
-		"document.getElementById('" . $focus_field . "').focus();" : "" ?>
+		"document.getElementById('" . $focus_field . "').focus();\n" : "" ?>
 
 	// Internet explorer does not support ":hover" CSS attribute. The script below adds an onMouseOver/Out
 	// handler for every <tr> element whose class is "data" and every <td> element whose class is "clickable".
 	// The handlers change the class of the element to simulate the ':hover' style.
 	if(document.getElementsByTagName) {
 		var className = 'hovered';
-		var pattern = new RegExp('(^|\\s+)' + className + '(\\s+|$)');
+		//var pattern = new RegExp('(^|\\s+)' + className + '(\\s+|$)');
 		var rows = document.getElementsByTagName('tr');
 
 		for(var i=0; i<rows.length; i++) {
@@ -568,7 +570,7 @@ if ($qDBTable && $qDBAction == "insert") {
 				<? if($qDBAction == "select") { ?>
 				rows[i].onmouseover = function() { this.className = "data_hovered"; };
 				rows[i].onmouseout = function() { this.className = "data"; };
-				<? } else { echo $qDBAction; }?>
+				<? } ?>
 			}
 		}
 		rows = document.getElementsByTagName('td');
@@ -599,4 +601,3 @@ if($bExport) {
 	ob_end_flush();
 }
 ?>
-

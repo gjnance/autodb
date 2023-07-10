@@ -1,4 +1,3 @@
-
 <?
 // Diagnostic function to print an array formatted for HTML similar to the function print_r
 function html_print_r($a)
@@ -17,8 +16,11 @@ function GET($var) {
 // Update/retrieve preference for this variable
 function GetCachedVar($qDBTable, $var, $default = '')
 {
+    $dblink = $GLOBALS['adb_dblink'];
+
 	// See if the variable was specified in GET or POST
 	$value = GetVar($var);
+
 	$prev_value = GetVar("prev_" . $var);
 
 	// If logged in, use user specific settings
@@ -30,8 +32,13 @@ function GetCachedVar($qDBTable, $var, $default = '')
 		"dbtable=" . my_esc($qDBTable) . " && var=" . my_esc($var) . $user_where;
 
 	$res = DBQuery($query);
-	$row = mysql_fetch_array($res);
-	$cached = $row['value'];
+
+	if (is_null($res)) {
+	    $row = mysqli_fetch_array($res);
+		$cached = $row['value'];
+	} else {
+		$cached = null;
+	}
 
 	if ($value || $value != $prev_value) {
 		// Value specified in GET or POST, insert or update new preference
@@ -58,33 +65,30 @@ function GetVar($var, $default = '')
 	return isset($_POST[$var]) ? $_POST[$var] : (isset($_GET[$var]) ? $_GET[$var] : $default);
 }
 
-// my_esc() - a safe version of mysql_escape_string that quotes a variable to make it safe depending on
+// my_esc() - a safe version of mysqli_escape_string that quotes a variable to make it safe depending on
 // whether get_magic_quotes_gpc is enabled or not
 function my_esc($value)
 {
-	// Stripslashes
-	if (get_magic_quotes_gpc())
-		 $value = stripslashes($value);
+    $dblink = $GLOBALS['adb_dblink'];
 
 	// Quote if not a number or a numeric string
 	if (!is_numeric($value))
-		 $value = "'" . mysql_real_escape_string($value) . "'";
+		 $value = "'" . mysqli_real_escape_string($dblink, $value) . "'";
 
 	return $value;
 }
 
 // GetDatabases() - Returns a list of databases available on the server we're connected to
-function GetDatabases($dblink=false)
+function GetDatabases()
 {
-	if(!$dblink)
-		$dblink = $GLOBALS['adb_dblink'];
+	$dblink = $GLOBALS['adb_dblink'];
 
 	$dbs = array();
 
 	// Get list of available databses
-	$res = mysql_list_dbs($dblink);
+	$res = mysqli_query($dblink, "SHOW DATABASES");
 
-	while ($row = mysql_fetch_object($res))
+	while ($row = mysqli_fetch_object($res))
 		array_push($dbs, $row->Database);
 
 	return $dbs;
@@ -98,9 +102,9 @@ function GetTables($db, $dblink=false)
 
 	$tables = array();
 
-	$res = DBQuery("SHOW TABLES FROM " . mysql_escape_string($db));
+	$res = DBQuery("SHOW TABLES FROM " . mysqli_escape_string($dblink, $db));
 
-	while ($row = mysql_fetch_row($res))
+	while ($row = mysqli_fetch_row($res))
 		array_push($tables, $row[0]);
 
 	return $tables;
@@ -116,6 +120,8 @@ function Error($err)
 // Retrieve display rules for the given database and table
 function FetchRelations($rel_table, $t_row)
 {
+	$dblink = $GLOBALS['adb_dblink'];
+
 	// Array that will be returned mapping columns to related column data in other tables
 	$adb_cols = array();
 
@@ -123,7 +129,7 @@ function FetchRelations($rel_table, $t_row)
 
 		// Is there an autodb table describing how to display this table?
 		$query = "SELECT * FROM " . AUTODB_REL . " " .
-			"WHERE adb_t1 = '" . mysql_escape_string($rel_table) . "' AND " .
+			"WHERE adb_t1 = '" . mysqli_escape_string($dblink, $rel_table) . "' AND " .
 				"adb_t1_relcol = '" . $column . "' LIMIT 1";
 
 		$res = DBQuery($query);
@@ -131,7 +137,7 @@ function FetchRelations($rel_table, $t_row)
 		if ($res) {
 			// One or more rules for displaying this table were found. Loop through them
 			// and get the necessary data from the related tables.
-			while($row = mysql_fetch_assoc($res)) {
+			while($row = mysqli_fetch_assoc($res)) {
 
 				// Don't include this display rule if row doesn't include the column from t1
 				if (!isset($t_row[$row['adb_t1_relcol']]))
@@ -143,7 +149,7 @@ function FetchRelations($rel_table, $t_row)
 					$dblink = mysql_connect($row['adb_t2_remhost'], $row['adb_t2_remuser'], $row['adb_t2_rempass']);
 
 					if(!$dblink)
-						die("<div class=\"red\">" . mysql_error($dblink) . "<br>$query</div>");
+						die("<div class=\"red\">" . mysqli_error($dblink) . "<br>$query</div>");
 				}
 				else
 					$dblink = $GLOBALS['adb_dblink'];
@@ -161,7 +167,7 @@ function FetchRelations($rel_table, $t_row)
 				$adbrel_result = DBQuery($query, $dblink);
 
 				// Create an associative array of related data for use when displaying the table
-				while ($adbrel_row = mysql_fetch_assoc($adbrel_result))
+				while ($adbrel_row = mysqli_fetch_assoc($adbrel_result))
 					$adb_cols[$row['adb_t1_relcol']][$adbrel_row[$row['adb_t2_relcol']]] =
 						$adbrel_row[$row['adb_t2_dspcol']];
 			}
@@ -269,7 +275,8 @@ function TimeInput($field, $sel, $type, $style = '')
 
 function GetTableFields($DBTable)
 {
-	$query = "SELECT * FROM " . mysql_escape_string($DBTable) . " LIMIT 0";
+	$dblink = $GLOBALS['adb_dblink'];
+	$query = "SELECT * FROM " . mysqli_escape_string($dblink, $DBTable) . " LIMIT 0";
 	return GetTableFieldsFromQuery($query, $DBTable);
 }
 
@@ -277,14 +284,16 @@ function GetTableFields($DBTable)
 // GetTableDescription. Used to get a list of fields for a particular query only and not all fields for a table
 function GetTableFieldsFromQuery($query, $DBTable = '')
 {
+	$dblink = $GLOBALS['adb_dblink'];
+
 	// Also run a DESCRIBE from the table to get a bit more info if DBTable is present
 	$desc_fields = array();
 	if($DBTable) {
-		$desc_query = "DESCRIBE " . mysql_escape_string($DBTable);
+		$desc_query = "DESCRIBE " . mysqli_escape_string($dblink, $DBTable);
 
 		$res = DBQuery($desc_query);
 
-		while ($row = mysql_fetch_assoc($res))
+		while ($row = mysqli_fetch_assoc($res))
 			$desc_fields[$row['Field']] = $row;
 	}
 
@@ -294,8 +303,8 @@ function GetTableFieldsFromQuery($query, $DBTable = '')
 	// Build an array of fields from the result set
 	$fields = array();
 
-	for($i=0; $i<mysql_num_fields($res); $i++) {
-		$data = mysql_fetch_field($res, $i);
+	for($i=0; $i<mysqli_num_fields($res); $i++) {
+		$data = mysqli_fetch_field($res);
 
 		if (isset($desc_fields[$data->name]) && $desc_fields[$data->name]['Extra'] == 'auto_increment')
 			$data->auto_increment = 1;
@@ -313,14 +322,16 @@ function GetTableFieldsFromQuery($query, $DBTable = '')
 // Get relation columns for $DBTable and return them as an array
 function GetRelations($DBTable)
 {
+	$dblink = $GLOBALS['adb_dblink'];
+
 	$query = "SELECT * FROM " . AUTODB_REL . " " .
-		"WHERE adb_t1 = '" . mysql_escape_string($DBTable) . "'";
+		"WHERE adb_t1 = '" . mysqli_escape_string($dblink, $DBTable) . "'";
 
 	$res = DBQuery($query);
 
 	$rcols = array();
 
-	while($row = mysql_fetch_assoc($res))
+	while($row = mysqli_fetch_assoc($res))
 		$rcols[$row['adb_t1_relcol']] = $row;
 
 	return $rcols;
@@ -329,6 +340,7 @@ function GetRelations($DBTable)
 function BuildQuery(&$joins, &$where, &$rcols)
 {
 	global $qDatabase, $qDBTable, $qWhere, $qOrder, $qLimit;
+	$dblink = $GLOBALS['adb_dblink'];
 
 	// Get relation columns for this table
 	$rcols = GetRelations($qDBTable);
@@ -353,12 +365,12 @@ function BuildQuery(&$joins, &$where, &$rcols)
 			if ($rcol['adb_t2_remhost'] && $rcol['adb_t2_remuser']) {
 				// Column data comes from a remote server. Connect, get the table description, and create a
 				// temporary table locally to store the required data in if we haven't already done so.
-				$tmp_table = $rcol['adb_t1_relcol'] . "_" . ereg_replace("\.", "_", $rcol['adb_t2']);
+				$tmp_table = $rcol['adb_t1_relcol'] . "_" . preg_replace("\.", "_", $rcol['adb_t2']);
 
 				$rem_dblink = mysql_connect($rcol['adb_t2_remhost'], $rcol['adb_t2_remuser'], $rcol['adb_t2_rempass']);
 
 				if(!$rem_dblink)
-					die("<div class=\"red\">" . mysql_error() . "<br>$query</div>");
+					die("<div class=\"red\">" . mysqli_error($dblink) . "<br>$query</div>");
 
 				// Get CREATE TABLE syntax for creating a local (temporary) copy of the remote table
 				$query = "SHOW CREATE TABLE " . $rcol['adb_t2'];
@@ -367,9 +379,9 @@ function BuildQuery(&$joins, &$where, &$rcols)
 				mysql_select_db($qDatabase, $GLOBALS['adb_dblink']);
 				$query = $row['Create Table'];
 				$query = preg_replace("/^CREATE TABLE `.*`/U", "CREATE TEMPORARY TABLE `$tmp_table`", $query);
-				$query = eregi_replace("auto_increment", "", $query);
-				$query = eregi_replace("ENGINE=[A-Za-z]*", "", $query);
-				$query = eregi_replace("DEFAULT CHARSET=[[:alnum:]]*", "", $query);
+				$query = preg_replace("auto_increment", "", $query);
+				$query = preg_replace("ENGINE=[A-Za-z]*", "", $query);
+				$query = preg_replace("DEFAULT CHARSET=[[:alnum:]]*", "", $query);
 
 				// Execute the query, creating a local copy of the remote table
 				DBQuery($query);
@@ -382,28 +394,28 @@ function BuildQuery(&$joins, &$where, &$rcols)
 			$relcol = $rcol['adb_t2'] . "." . $rcol['adb_t2_relcol'];
 
 			// Add column, tables, and an appropriate join linking the two
-			$cols .= "$dspcol AS " . $field->name . ", " . mysql_escape_string($qDBTable) . "." .
-				mysql_escape_string($field->name) . " AS _adbrel_" . mysql_escape_string($field->name);
+			$cols .= "$dspcol AS " . $field->name . ", " . mysqli_escape_string($dblink, $qDBTable) . "." .
+				mysqli_escape_string($dblink, $field->name) . " AS _adbrel_" . mysqli_escape_string($dblink, $field->name);
 
-			if(!ereg("LEFT JOIN " . $rcol['adb_t2'], $joins)) {
+			if(!preg_match("/LEFT JOIN " . $rcol['adb_t2'] . "/", $joins)) {
 				$joins .= "\nLEFT JOIN " . $rcol['adb_t2'] . " ON " .
 					$qDBTable . "." . $field->name . " = " . $relcol;
 			}
 
 			// Replace columns in where with appropriate relation columns
-			$qWhere = ereg_replace($field->name, $dspcol, $qWhere);
+			$qWhere = preg_replace("/" . $field->name . "/", $dspcol, $qWhere);
 
 		} else {
-			$cols .= mysql_escape_string($qDBTable) . "." . $field->name;
+			$cols .= mysqli_escape_string($dblink, $qDBTable) . "." . $field->name;
 		}
 	}
 
 	// Add WHERE, ORDER, and LIMIT
 	$where = $qWhere ? "\nWHERE " . $qWhere : "";
-	$order = $qOrder ? "\nORDER BY " . mysql_escape_string($qOrder) : "";
+	$order = $qOrder ? "\nORDER BY " . mysqli_escape_string($dblink, $qOrder) : "";
 	$limit = ($qLimit && $qLimit != 'all') ? "\nLIMIT " . intval($qLimit) : "";
 
-	$query = "SELECT " . $cols . "\nFROM " . mysql_escape_string($qDBTable) .
+	$query = "SELECT " . $cols . "\nFROM " . mysqli_escape_string($dblink, $qDBTable) .
 		$joins . $where . $order . $limit;
 
 	$rows = DBQueryGetRows($query);
@@ -419,7 +431,7 @@ function BuildQuery(&$joins, &$where, &$rcols)
 			$rem_dblink = mysql_connect($rcol['adb_t2_remhost'], $rcol['adb_t2_remuser'], $rcol['adb_t2_rempass']);
 
 			if(!$rem_dblink)
-				die("<div class=\"red\">" . mysql_error() . "<br>$query</div>");
+				die("<div class=\"red\">" . mysqli_error($dblink) . "<br>$query</div>");
 
 			$values = array();
 			foreach($rows as $row) {
@@ -459,8 +471,9 @@ function GetReports($qDBTable)
 
 	$rdir = opendir("./reports");
 	
+	echo "table=$qDBTable<br/>\n";
 	while($file = readdir($rdir)) {
-		if(eregi("^" . $qDBTable . "[0-9]*\.php$", $file))
+		if(preg_match("/^" . $qDBTable . "\..*\.php$/", $file))
 			array_push($reports, "./reports/" . $file);
 	}
 	return $reports;
@@ -468,6 +481,7 @@ function GetReports($qDBTable)
 
 function DBBuildWhere($where_data)
 {
+	$dblink = $GLOBALS['adb_dblink'];
 	$where = '';
 
 	// Build up where if necessary
@@ -478,7 +492,7 @@ function DBBuildWhere($where_data)
 		else if(is_array($where_data)) {
 			$where = " WHERE ";
 			foreach($where_data as $name=>$value)
-				$where .= $name . " = '" . mysql_escape_string($value) . "' AND ";
+				$where .= $name . " = '" . mysqli_escape_string($dblink, $value) . "' AND ";
 
 			// Remove extra " AND "
 			$where = ereg_replace(" AND $", "", $where);
@@ -492,11 +506,11 @@ function DBQuery($query, $dblink=false)
 	if(!$dblink)
 		$dblink = $GLOBALS['adb_dblink'];
 
-	if(!($res = mysql_query($query, $dblink))) {
+	if(!($res = mysqli_query($dblink, $query))) {
 		die('<table class="red">
 				<tr>
 					<td valign="top"><img src="gfx/network-error.gif"></td>
-					<td>' . mysql_error($dblink) . "<p>" .
+					<td>' . mysqli_error($dblink) . "<p>" .
 							nl2br($query) . '</td>
 				</tr>
 			</table>');
@@ -512,7 +526,7 @@ function DBQueryGetRows($query, $dblink=false)
 
 	$rows = array();
 	$res = DBQuery($query, $dblink);
-	while($row = mysql_fetch_assoc($res))
+	while($row = mysqli_fetch_assoc($res))
 		array_push($rows, $row);
 	return $rows;
 }
@@ -527,7 +541,7 @@ function DBGetRows($table, $where='', $order='', $dblink=false)
 	$res = DBQuery($query, $dblink);
 	$rows = array();
 
-	while($row = mysql_fetch_assoc($res))
+	while($row = mysqli_fetch_assoc($res))
 		array_push($rows, $row);
 
 	return $rows;
@@ -535,19 +549,19 @@ function DBGetRows($table, $where='', $order='', $dblink=false)
 
 function DBQueryGetRow($query, $dblink = false)
 {
-	return mysql_fetch_assoc(DBQuery($query, $dblink));
+	return mysqli_fetch_assoc(DBQuery($query, $dblink));
 }
 
 function DBGetRow($table, $where='', $dblink = false)
 {
 	$query = "SELECT * FROM " . $table . DBBuildWhere($where) . " LIMIT 1";
-	return mysql_fetch_assoc(DBQuery($query, $dblink));
+	return mysqli_fetch_assoc(DBQuery($query, $dblink));
 }
 
 function DBGetRowValue($table, $value, $where='', $dblink = false)
 {
 	$query = "SELECT $value FROM " . $table . DBBuildWhere($where) . " LIMIT 1";
-	$row = mysql_fetch_assoc(DBQuery($query, $dblink));
+	$row = mysqli_fetch_assoc(DBQuery($query, $dblink));
 	return $row[$value];
 }
 
