@@ -1,7 +1,9 @@
-
 <?
+// Start buffering output
+ob_start();
+
 if(isset($bInclude) && $bInclude) {
-	echo "Export Selected as Comma Separated Values (CSV - name/email only!)";
+	echo "Export Names and E-mails Only as CSV (Comma Separated Values)";
 	return;
 }
 
@@ -11,8 +13,8 @@ include("../adb_functions.php");
 // Debug causes the script to echo data instead of forcing a file download
 $debug = 0;
 
-$adb_dblink = mysql_connect("localhost", "gnanceco_greg", "00zfdc");
-mysql_select_db("gnanceco_playground");
+$adb_dblink = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS);
+mysqli_select_db($adb_dblink, "gnanceco_playground");
 
 $qDBTable = "gnanceco_playground.contacts";
 $qWhere = GetCachedVar($qDBTable, "where");
@@ -20,13 +22,13 @@ $qOrder = GetCachedVar($qDBTable, "order");
 $qLimit = GetCachedVar($qDBTable, "limit");
 $query = BuildQuery($joins, $where, $rcols);
 
-$res = mysql_query($query);
+$res = mysqli_query($adb_dblink, $query);
 if(!$res)
-	die(mysql_error());
+	die(mysqli_error($adb_dblink));
 
 $content = "Last Name, First Name, Email Address\n";
 
-while($row = mysql_fetch_assoc($res)) {
+while($row = mysqli_fetch_assoc($res)) {
 	if($row['email1'])
 		$content .= "{$row['name_last']},{$row['name_first']},{$row['email1']}\n";
 	if($row['email2'])

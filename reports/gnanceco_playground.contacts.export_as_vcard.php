@@ -1,5 +1,7 @@
-
 <?
+// Start buffering output
+ob_start();
+
 if(isset($bInclude) && $bInclude) {
 	echo "Export Selected as VCARDs";
 	return;
@@ -11,8 +13,8 @@ include("../adb_functions.php");
 // Debug causes the script to echo vcards instead of forcing a file download
 $debug = 0;
 
-$adb_dblink = mysql_connect("localhost", "gnanceco_greg", "00zfdc");
-mysql_select_db("gnanceco_playground");
+$adb_dblink = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS);
+mysqli_select_db($adb_dblink, "gnanceco_playground");
 
 $qDBTable = "gnanceco_playground.contacts";
 $qWhere = GetCachedVar($qDBTable, "where");
@@ -20,15 +22,15 @@ $qOrder = GetCachedVar($qDBTable, "order");
 $qLimit = GetCachedVar($qDBTable, "limit");
 $query = BuildQuery($joins, $where, $rcols);
 
-$res = mysql_query($query);
+$res = mysqli_query($adb_dblink, $query);
 if(!$res)
-	die(mysql_error());
+	die(mysqli_error($adb_dblink));
 
 $content = '';
 
-while($row = mysql_fetch_assoc($res)) {
+while($row = mysqli_fetch_assoc($res)) {
 	foreach($row as $name=>$val)
-		$row[$name] = ereg_replace("[\n\r]+", ", ", $val);
+		$row[$name] = preg_replace("/[\n\r]+/", ", ", $val);
 
 	$content .= "BEGIN:vCard
 VERSION:3.0
@@ -58,4 +60,5 @@ if($debug) {
 	header("Content-Disposition: attachment; filename=contacts.vcf"); 
 	echo $content;
 }
+ob_end_clean();
 ?>
