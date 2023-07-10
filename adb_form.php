@@ -1,5 +1,3 @@
-
-
 <form name="autodb_form" action="<?= AUTODB_BASEURL ?>/" method="POST">
 <input type="hidden" name="order" value="<?=htmlspecialchars($qOrder)?>">
 <input type="hidden" name="deleterow" value="0">

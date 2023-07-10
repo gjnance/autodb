@@ -471,7 +471,6 @@ function GetReports($qDBTable)
 
 	$rdir = opendir("./reports");
 	
-	echo "table=$qDBTable<br/>\n";
 	while($file = readdir($rdir)) {
 		if(preg_match("/^" . $qDBTable . "\..*\.php$/", $file))
 			array_push($reports, "./reports/" . $file);
