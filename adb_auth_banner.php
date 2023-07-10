@@ -1,4 +1,3 @@
-
 <?
 // Display a banner indication authorization/security state and the server the user is connected to
 if (isset($_SERVER['AUTH_TYPE'])) {
@@ -10,7 +9,7 @@ if (isset($_SERVER['AUTH_TYPE'])) {
 	$txt = "&nbsp;WARNING: AutoDB is INSECURE by design and is currently available to untrusted users. " .
 		"Please configuration some form of authentication";
 }
-$host = (eregi("localhost", MYSQL_HOST) ? `hostname` : MYSQL_HOST);
+$host = (preg_match("/localhost/", MYSQL_HOST) ? `hostname` : MYSQL_HOST);
 ?>
 
 <table class="<?= $color ?>" cellpadding="0" cellspacing="0" border="0" width="100%">
