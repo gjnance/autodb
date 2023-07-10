@@ -18,6 +18,8 @@ define('AUTODB_DB', '');
 //   PRIMARY KEY (adb_t1, adb_t1_relcol)
 // );
 //
+// Huh?
+//
 // Suppose the following row exists in a table called 'users':
 //   +----+----------+----------+--------------+
 //   | id | name     | username | user_type_id |
