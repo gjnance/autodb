@@ -7,7 +7,7 @@ define('MYSQL_PASS', 'XXX');
 //define('AUTODB_REL', 'gnanceco_demo.autodb_rel');
 define('AUTODB_REL', 'gnanceco_demo.autodb_rules');
 define('AUTODB_PREFS', 'gnanceco_playground.autodb_prefs');
-define('AUTODB_BASEURL', '/autodb');
+define('AUTODB_BASEURL', '/');
 define('AUTODB_DB', 'gnanceco_demo');
 
 // CREATE TABLE autodb_rel (

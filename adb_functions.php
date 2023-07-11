@@ -113,7 +113,7 @@ function GetTables($db, $dblink=false)
 function Error($err)
 {
 	return '<table class="red" cellpadding="0" cellspacing="0" width="100%">' .
-		'<tr><td><img src="' . AUTODB_BASEURL . '/gfx/network-error.gif" align="left">' . $err . '</td></tr>' .
+		'<tr><td><img src="' . AUTODB_BASEURL . 'gfx/network-error.gif" align="left">' . $err . '</td></tr>' .
 		'</table><p>';
 }
 

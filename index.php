@@ -19,8 +19,14 @@ error_reporting(E_ALL);
 // Set an execution limit of 60 seconds
 set_time_limit(60);
 
+mysqli_report(MYSQLI_REPORT_OFF);
+
 // Make database connection
 $adb_dblink = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS);
+
+if (!$adb_dblink) {
+	die(Error('Connection error: ' . mysqli_connect_error()));
+}
 
 // Start buffering output
 ob_start();
