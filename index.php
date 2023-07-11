@@ -1,4 +1,4 @@
-<?
+<?php
 // AutoDB - Allows a user to browse through a MySQL server's databases and their tables. Also provides a
 // rudimentary form for inserting data into any of the tables of the database
 //
@@ -135,12 +135,12 @@ $title = 'AutoDB' . ($qDatabase ? " :: $qDatabase" : "") . ($qTable ? " :: $qTab
 // Start HTML output
 ?>
 <html>
-<title><?= $title ?></title>
+<title><?php $title ?></title>
 <link href="adb.css" rel="stylesheet" type="text/css">
 <body background="gfx/adb-background.gif">
-<script language="JavaScript" src="<?= AUTODB_BASEURL ?>/adb_js.php"></script>
+<script language="JavaScript" src="<?php AUTODB_BASEURL ?>/adb_js.php"></script>
 
-<?
+<?php
 // INSERT or UPDATE action?
 $status = "";
 if ($qS) {
@@ -251,12 +251,12 @@ echo $status;
 if ($qDBTable && $qDBAction == "insert") {
 ?>
 	<form name="autodb_insert_form" action="" method="POST">
-	<input type="hidden" name="db" value="<?=htmlspecialchars($qDatabase)?>">
-	<input type="hidden" name="table" value="<?=htmlspecialchars($qTable)?>">
+	<input type="hidden" name="db" value="<?php htmlspecialchars($qDatabase) ?>">
+	<input type="hidden" name="table" value="<?php htmlspecialchars($qTable) ?>">
 	<input type="hidden" name="dbaction" value="insert">
-	<input type="hidden" name="copyrow" value="<?=$qCopyRow?>">
+	<input type="hidden" name="copyrow" value="<?php $qCopyRow ?>">
 	<input type="hidden" name="s" value="1">
-<?
+<?php
 	// If all primary keys were provided, user is updating an existing entry. Output hidden form fields for
 	// the primary key values so we can update the right record when the form is submitted.
 	if ($key_where && $pkey_cols) {
@@ -280,7 +280,7 @@ if ($qDBTable && $qDBAction == "insert") {
 ?>
 	<table class="data" cellpadding="0" cellspacing="0" border="0">
 	<tr class="data" style="font-weight: bold;"><td style="border-left: 0px;">Column</td><td width="600">Value</td><!--<td>Type</td>--></tr>
-<?
+<?php
 
 	$nRows = count($fields);
 	$nRow = 0;
@@ -496,9 +496,9 @@ if ($qDBTable && $qDBAction == "insert") {
 
 	<p><div style="font-style: italic; background: #FFAAAA; border: 1px solid gray; padding: 2px; width: 182;">Input fields in red are required</div><p>
 
-	<input type="submit" value="<?=(isset($row) && !$qCopyRow ? 'Update' : 'Insert')?>"
+	<input type="submit" value="<?php (isset($row) && !$qCopyRow ? 'Update' : 'Insert') ?>"
 	       style="border: 1px solid #9933FF; height: 25px; width: 150px; cursor: pointer;">
-<?
+<?php
 } else if ($qDBTable && ($qDBAction == "select" || $qDBAction == "export" || !$qDBAction)) {
 
 	// Build the query and execute it
@@ -550,11 +550,11 @@ if ($qDBTable && $qDBAction == "insert") {
 ?>
 
 <script language="JavaScript">
-	<? if ($qDatabase && $qTable) { ?>
-	document.autodb_form.dbaction.value='<?=$qDBAction?>';
-	<? } ?>
+	<?php if ($qDatabase && $qTable) { ?>
+	document.autodb_form.dbaction.value='<?php $qDBAction ?>';
+	<?php } ?>
 
-	<?= isset($focus_field) && $focus_field ?
+	<?php isset($focus_field) && $focus_field ?
 		"document.getElementById('" . $focus_field . "').focus();\n" : "" ?>
 
 	// Internet explorer does not support ":hover" CSS attribute. The script below adds an onMouseOver/Out
@@ -567,10 +567,10 @@ if ($qDBTable && $qDBAction == "insert") {
 
 		for(var i=0; i<rows.length; i++) {
 			if(rows[i].className == "data") {
-				<? if($qDBAction == "select") { ?>
+				<?php if($qDBAction == "select") { ?>
 				rows[i].onmouseover = function() { this.className = "data_hovered"; };
 				rows[i].onmouseout = function() { this.className = "data"; };
-				<? } ?>
+				<?php } ?>
 			}
 		}
 		rows = document.getElementsByTagName('td');
@@ -588,7 +588,7 @@ if ($qDBTable && $qDBAction == "insert") {
 </form>
 </html>
 
-<?
+<?php
 if($bExport) {
 	ob_end_clean();
 	header("Cache-Control: no-store, no-cache, must-revalidate, private");

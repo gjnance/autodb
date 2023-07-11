@@ -1,4 +1,4 @@
-<? include "adb_config.php"; ?>
+<?php include "adb_config.php"; ?>
 
 function Submit(bClear, bForceSelect) {
 	if (bForceSelect && document.autodb_form.dbaction)
@@ -70,7 +70,7 @@ function GetSuggestions(table, col, value)
 	if (!request)
 		return alert("XML HTTP Request Initialization Failure");
 
-	url = '<?= AUTODB_BASEURL ?>/suggest.php?dbtable=' + table + '&col=' + col + '&value=' + value;
+	url = '<?php AUTODB_BASEURL ?>/suggest.php?dbtable=' + table + '&col=' + col + '&value=' + value;
 
 	request.open('GET', url, true);
 

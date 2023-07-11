@@ -1,4 +1,4 @@
-<?
+<?php
 define('MYSQL_HOST', 'localhost');
 define('MYSQL_USER', 'XXX');
 define('MYSQL_PASS', 'XXX');

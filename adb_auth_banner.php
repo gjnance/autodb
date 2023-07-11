@@ -1,4 +1,4 @@
-<?
+<?php
 // Display a banner indication authorization/security state and the server the user is connected to
 if (isset($_SERVER['AUTH_TYPE'])) {
 	$color = "green";
@@ -12,14 +12,14 @@ if (isset($_SERVER['AUTH_TYPE'])) {
 $host = (preg_match("/localhost/", MYSQL_HOST) ? `hostname` : MYSQL_HOST);
 ?>
 
-<table class="<?= $color ?>" cellpadding="0" cellspacing="0" border="0" width="100%">
+<table class="<?php $color ?>" cellpadding="0" cellspacing="0" border="0" width="100%">
 	<tr>
-		<td width="72%"><?= $txt ?></td>
+		<td width="72%"><?php $txt ?></td>
 		<td align="right">
-			<table class="<?= $color ?>" style="padding: 0px; border: 0px;" cellpadding="0" cellspacing="0" border="0">
+			<table class="<?php $color ?>" style="padding: 0px; border: 0px;" cellpadding="0" cellspacing="0" border="0">
 				<tr>
 					<td><img src="gfx/network-idle.gif"></td>
-					<td style="padding-left: 5px;">Connected to <?= $host ?>&nbsp;</td>
+					<td style="padding-left: 5px;">Connected to <?php $host ?>&nbsp;</td>
 				</tr>
 			</table>
 		</td>

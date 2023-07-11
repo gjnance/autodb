@@ -1,4 +1,4 @@
-<?
+<?php
 // Include configuration file (mostly database stuff)
 include "adb_config.php";
 

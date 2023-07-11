@@ -1,4 +1,4 @@
-<?
+<?php
 // Diagnostic function to print an array formatted for HTML similar to the function print_r
 function html_print_r($a)
 {

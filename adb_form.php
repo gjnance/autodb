@@ -1,9 +1,9 @@
-<form name="autodb_form" action="<?= AUTODB_BASEURL ?>/" method="POST">
-<input type="hidden" name="order" value="<?=htmlspecialchars($qOrder)?>">
+<form name="autodb_form" action="<?php AUTODB_BASEURL ?>/" method="POST">
+<input type="hidden" name="order" value="<?php htmlspecialchars($qOrder) ?>">
 <input type="hidden" name="deleterow" value="0">
 <input type="hidden" name="copyrow" value="0">
 <div class="banner">
-<?
+<?php
 if (isset($pkey_cols)) {
 	foreach ($pkey_cols as $key_col)
 		echo '<input type="hidden" name="_adbkeycol_' . $key_col . '" id="_adbkeycol_' . $key_col . '">';
@@ -13,12 +13,12 @@ if (!$bForceDB) {
 ?>
 	<select name="db" onChange="if(this.value) Submit(true, false);">
 		<option value="">- Select Database -</option>
-		<? foreach (GetDatabases() as $db)
+		<?php foreach (GetDatabases() as $db)
 			echo '<option value="' . htmlspecialchars($db) . '"' .
 				($db == $qDatabase ? ' selected' : '') . '>' . htmlspecialchars($db) . '</option>'; ?>
 	</select>
 
-<?
+<?php
 }
 // Show list of tables in the selected database if one has been selected
 if ($qDatabase) {

@@ -1,4 +1,4 @@
-<?
+<?php
 // adb_dtable.php - Output a table of data. Expects the following to be defined:
 //
 // $fields = array(array('Field' => field1), array('Field' => field2), ...); 
@@ -31,7 +31,7 @@ if ($debug) {
 <table class="data" cellpadding="0" cellspacing="0" width="50%">
 <tr valign="top" class="data">
 
-<?
+<?php
 // Output column headings
 $nRows = count($data);
 $nCol = 0;
@@ -162,7 +162,7 @@ foreach($data as $row) {
 ?>
 
 <script language="JavaScript">
-<?= $key_col_js ?>
+<?php $key_col_js ?>
 </script>
 
 </table>
