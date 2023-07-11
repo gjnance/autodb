@@ -13,11 +13,11 @@ CREATE TABLE `autodb_prefs` (
 ) ENGINE=MyISAM AUTO_INCREMENT=119 DEFAULT CHARSET=latin1;
 
 --
--- Table structure for table `autodb_rel`
+-- Table structure for table `autodb_rules`
 --
 
-DROP TABLE IF EXISTS `autodb_rel`;
-CREATE TABLE `autodb_rel` (
+DROP TABLE IF EXISTS `autodb_rules`;
+CREATE TABLE `autodb_rules` (
   `adb_t1` varchar(128) NOT NULL default '',
   `adb_t1_relcol` varchar(128) NOT NULL default '',
   `adb_t2_remhost` varchar(255) default NULL,
