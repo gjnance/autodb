@@ -19,8 +19,12 @@
 $bInteractive = isset($bInteractive) ? $bInteractive : FALSE;
 $max_data_len = isset($max_data_len) ? $max_data_len : 500;
 
-//html_print_r($fields);
-//html_print_r($data);
+$debug = false;
+
+if ($debug) {
+	html_print_r($fields);
+	html_print_r($data);
+}
 
 ?>
 

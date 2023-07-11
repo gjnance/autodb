@@ -4,10 +4,11 @@ define('MYSQL_USER', 'XXX');
 define('MYSQL_PASS', 'XXX');
 
 // AUTODB_TABLE should be a table that looks like the table 'autodb_tables' (below).
-define('AUTODB_REL', 'gnanceco_playground.autodb_rel');
+//define('AUTODB_REL', 'gnanceco_demo.autodb_rel');
+define('AUTODB_REL', 'gnanceco_demo.autodb_rules');
 define('AUTODB_PREFS', 'gnanceco_playground.autodb_prefs');
 define('AUTODB_BASEURL', '/autodb');
-define('AUTODB_DB', '');
+define('AUTODB_DB', 'gnanceco_demo');
 
 // CREATE TABLE autodb_rel (
 //   adb_t1 VARCHAR(128) NOT NULL,
