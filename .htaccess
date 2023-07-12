@@ -1,4 +1,0 @@
-AuthType	basic
-AuthName	"Secured area"
-AuthUserFile	/home3/gnanceco/.htpasswd_autodb
-Require	valid-user
