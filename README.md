@@ -89,14 +89,26 @@ Due to the intentionally insecure nature of AutoDB, it is strongly advised that 
 
 ```
 $ sudo apt install apache2-utils
-$ sudo htpasswd -c .htpasswd adb_user
+$ sudo htpasswd -c /var/www/.htpasswd_adb adb_user
 New password:
 Re-type new password:
 Adding password for user adb_user
 ```
 
+Add the following to the existing `location /` section of `/etc/nginx/sites-enabled/adb`
+
+```diff
+location / {
+    try_files $uri $uri/ =404;
++   auth_basic           "AutoDB Basic Authentication";
++   auth_basic_user_file /var/www/.htpasswd_adb;
+}
 ```
 
+Now restart NGINX using the following command:
+
+```
+$ sudo systemctl reload nginx
 ```
 
 #### Database Setup
