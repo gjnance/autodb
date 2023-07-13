@@ -176,21 +176,47 @@ mysql> show tables;
 
 ## Usage
 
-Connect to AutoDB in your web browser
+The remainder of this document assumes a functioning AutoDB installation with the tables from [demo.sql](./sql/demo.sql) loaded and populated with some entries. You can source the file as follows:
 
-### Relational Rules
+```
+mysql> source ./sql/demo.sql
+```
 
 ### Operations
 
 #### SELECT Mode
 
+When you first log into the UI, you should be presented with a simple drop-down asking you to select a database, if AUTODB_DB is not set in `adb_config.php`, or a table from the specified database if it has been.
+
+demo1.png
+
+Select the `contacts` database to see a list of 30 beloved comic book characters and their contact info (as provided by [ChatGPT-4](https://chat.openai.com/share/6aa8535b-e720-4aa3-85c8-2de16eef7dca))
+
+demo2.png
+
 #### INSERT Mode
+
+From the `Action` drop-down at the top of the page, select INSERT to display a form. The form is automatically generated based on a DESCRIBE, and has features such as:
+
+* Auto Increment columns cannot be provided
+* Display required fields in red (determined by Null=NO)
+* For relational columns, display a drop-down of choices pulled from an adjacent table rather than an integer (see [Relational Rules](./README.md#relational-rules])).
+
+demo3.png
 
 #### REPORT Mode
 
+### Relational Rules
+
+One of AutoDB's more useful features is the ability to id columns from relational columns (i.e., an ID in Table A which points to an entry in Table B). In the demo, you will have noticed that the `locality_id`, `region_id`, and `country_id` columns are displayed as integers, which is not terribly useful. Further, when inserting new data, you must know the proper `id` to specify from the adjoining table in order to link the two. AutoDB Relational Rules take the guesswork out of this by providing mappings between tables.
+
+To link the `locality_id`, `region_id`, and `country_id` columns to their respective tables, create the following entries in the `autodb_rules` table:
+
+demo4.png
+
 #### Export Mode
 
-![Example SELECT View](https://github.com/gjnance/autodb/assets/7406768/5a7bbc81-60e2-40ea-9358-360bcfb7d97d)
+
 
 ### Report Generation
 
