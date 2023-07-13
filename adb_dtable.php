@@ -162,7 +162,7 @@ foreach($data as $row) {
 ?>
 
 <script language="JavaScript">
-<?php $key_col_js ?>
+<?= $key_col_js ?>
 </script>
 
 </table>
