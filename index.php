@@ -502,7 +502,7 @@ if ($qDBTable && $qDBAction == "insert") {
 
 	<p><div style="font-style: italic; background: #FFAAAA; border: 1px solid gray; padding: 2px; width: 182;">Input fields in red are required</div><p>
 
-	<input type="submit" value="<?php (isset($row) && !$qCopyRow ? 'Update' : 'Insert') ?>"
+	<input type="submit" value="<?= (isset($row) && !$qCopyRow ? 'Update' : 'Insert') ?>"
 	       style="border: 1px solid #9933FF; height: 25px; width: 150px; cursor: pointer;">
 <?php
 } else if ($qDBTable && ($qDBAction == "select" || $qDBAction == "export" || !$qDBAction)) {
