@@ -188,11 +188,11 @@ mysql> source ./sql/demo.sql
 
 When you first log into the UI, you should be presented with a simple drop-down asking you to select a database, if AUTODB_DB is not set in `adb_config.php`, or a table from the specified database if it has been.
 
-demo1.png
+![SELECT Mode Demo Image 1](https://github.com/gjnance/autodb/assets/7406768/5488492e-c2f3-478c-bd4b-174749ee69fe)
 
 Select the `contacts` database to see a list of 30 beloved comic book characters and their contact info (as provided by [ChatGPT-4](https://chat.openai.com/share/6aa8535b-e720-4aa3-85c8-2de16eef7dca))
 
-demo2.png
+![SELECT Mode Demo Image 2](https://github.com/gjnance/autodb/assets/7406768/104b9dde-eeb1-4f2d-a0a2-3598f1f9a48c)
 
 #### INSERT Mode
 
@@ -202,21 +202,36 @@ From the `Action` drop-down at the top of the page, select INSERT to display a f
 * Display required fields in red (determined by Null=NO)
 * For relational columns, display a drop-down of choices pulled from an adjacent table rather than an integer (see [Relational Rules](./README.md#relational-rules])).
 
-demo3.png
+![INSERT Mode Demo Image 1](https://github.com/gjnance/autodb/assets/7406768/a5f007e3-9c07-45fa-ab90-6c19c63ff3b2)
 
 #### REPORT Mode
 
 ### Relational Rules
 
-One of AutoDB's more useful features is the ability to id columns from relational columns (i.e., an ID in Table A which points to an entry in Table B). In the demo, you will have noticed that the `locality_id`, `region_id`, and `country_id` columns are displayed as integers, which is not terribly useful. Further, when inserting new data, you must know the proper `id` to specify from the adjoining table in order to link the two. AutoDB Relational Rules take the guesswork out of this by providing mappings between tables.
+One of AutoDB's more useful features is the ability to id columns from relational columns. This is useful when you have a column in a table which is simply an `id` to an integer in another table. In SELECT example above, the `locality_id`, `region_id`, and `country_id` columns are displayed as integers, which is not terribly useful. Further, when inserting new data, you must know the proper `id` to specify from the adjoining table in order to link the two. AutoDB Relational Rules take the guesswork out of this by providing mappings between tables.
 
 To link the `locality_id`, `region_id`, and `country_id` columns to their respective tables, create the following entries in the `autodb_rules` table:
 
-demo4.png
+![AutoDB Example Rules](https://github.com/gjnance/autodb/assets/7406768/11bef4b4-d14a-471e-a447-a9c0f56b42c1)
+
+| Column  | Description |
+| ------------- | ------------- |
+| adb_t1  | The table containing references to relational ids  |
+| adb_t1_relcol  | The column in t1 containing the relational id |
+| adb_t2 | The table containing the entries for the relational id |
+| adb_t2_relcol | The column in t2 containing the relational id |
+| adb_t2_dspcol | The column in t2 to be displayed |
+| adb_t2_remhost | If t2 is a remote table, the host where t2 can be found |
+| adb_t2_remuser | If t2 is a remote table, the username to use when connecting to the remote database |
+| adb_t2_rempass | If t2 is a remote table, the password to use when connecting to the remote database |
+
+With the relational rules in place, when displaying the `contacts` table now, instead of seeing numeric values for `locality_id`, `region_id`, and `country_id`, you should see the values from the relational tables instead, displayed in italics to indicate that they are relational values.
+
+Hovering over the relational entry will display the actual id contained in the column for that row.
+
+![AutoDB Example Rules Demo](https://github.com/gjnance/autodb/assets/7406768/1c5d86a2-18a8-410e-91e7-c4cbcea2d24c)
 
 #### Export Mode
-
-
 
 ### Report Generation
 
