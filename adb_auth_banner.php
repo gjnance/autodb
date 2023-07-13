@@ -1,6 +1,6 @@
 <?php
 // Display a banner indication authorization/security state and the server the user is connected to
-if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+if (isset($_SERVER['PHP_AUTH_USER'])) {
 	$color = "green";
 	$txt = "&nbsp;AutoDB Directory protected by HTTP authentication " .
 		"(logged in as " . $_SERVER['PHP_AUTH_USER'] . ")";

@@ -16,7 +16,7 @@ function GET($var) {
 // Update/retrieve preference for this variable
 function GetCachedVar($qDBTable, $var, $default = '')
 {
-    $dblink = $GLOBALS['adb_dblink'];
+	$dblink = $GLOBALS['adb_dblink'];
 
 	// See if the variable was specified in GET or POST
 	$value = GetVar($var);
@@ -33,7 +33,7 @@ function GetCachedVar($qDBTable, $var, $default = '')
 
 	$res = DBQuery($query);
 
-	if (is_null($res)) {
+	if (!is_null($res)) {
 	    $row = mysqli_fetch_array($res);
 		$cached = $row['value'];
 	} else {
