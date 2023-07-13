@@ -1,5 +1,5 @@
-<form name="autodb_form" action="<?php AUTODB_BASEURL ?>/" method="POST">
-<input type="hidden" name="order" value="<?php htmlspecialchars($qOrder) ?>">
+<form name="autodb_form" action="<?= AUTODB_BASEURL ?>" method="POST">
+<input type="hidden" name="order" value="<?= htmlspecialchars($qOrder) ?>">
 <input type="hidden" name="deleterow" value="0">
 <input type="hidden" name="copyrow" value="0">
 <div class="banner">

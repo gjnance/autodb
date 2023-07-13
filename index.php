@@ -141,10 +141,10 @@ $title = 'AutoDB' . ($qDatabase ? " :: $qDatabase" : "") . ($qTable ? " :: $qTab
 // Start HTML output
 ?>
 <html>
-<title><?php $title ?></title>
+<title><?= $title ?></title>
 <link href="adb.css" rel="stylesheet" type="text/css">
 <body background="gfx/adb-background.gif">
-<script language="JavaScript" src="<?php AUTODB_BASEURL ?>/adb_js.php"></script>
+<script language="JavaScript" src="<?= AUTODB_BASEURL ?>adb_js.php"></script>
 
 <?php
 // INSERT or UPDATE action?
@@ -257,10 +257,10 @@ echo $status;
 if ($qDBTable && $qDBAction == "insert") {
 ?>
 	<form name="autodb_insert_form" action="" method="POST">
-	<input type="hidden" name="db" value="<?php htmlspecialchars($qDatabase) ?>">
-	<input type="hidden" name="table" value="<?php htmlspecialchars($qTable) ?>">
+	<input type="hidden" name="db" value="<?= htmlspecialchars($qDatabase) ?>">
+	<input type="hidden" name="table" value="<?= htmlspecialchars($qTable) ?>">
 	<input type="hidden" name="dbaction" value="insert">
-	<input type="hidden" name="copyrow" value="<?php $qCopyRow ?>">
+	<input type="hidden" name="copyrow" value="<?= $qCopyRow ?>">
 	<input type="hidden" name="s" value="1">
 <?php
 	// If all primary keys were provided, user is updating an existing entry. Output hidden form fields for
@@ -557,10 +557,10 @@ if ($qDBTable && $qDBAction == "insert") {
 
 <script language="JavaScript">
 	<?php if ($qDatabase && $qTable) { ?>
-	document.autodb_form.dbaction.value='<?php $qDBAction ?>';
+	document.autodb_form.dbaction.value='<?= $qDBAction ?>';
 	<?php } ?>
 
-	<?php isset($focus_field) && $focus_field ?
+	<?php echo isset($focus_field) && $focus_field ?
 		"document.getElementById('" . $focus_field . "').focus();\n" : "" ?>
 
 	// Internet explorer does not support ":hover" CSS attribute. The script below adds an onMouseOver/Out

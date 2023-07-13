@@ -70,7 +70,7 @@ function GetSuggestions(table, col, value)
 	if (!request)
 		return alert("XML HTTP Request Initialization Failure");
 
-	url = '<?php AUTODB_BASEURL ?>/suggest.php?dbtable=' + table + '&col=' + col + '&value=' + value;
+	url = '<?= AUTODB_BASEURL ?>suggest.php?dbtable=' + table + '&col=' + col + '&value=' + value;
 
 	request.open('GET', url, true);
 
