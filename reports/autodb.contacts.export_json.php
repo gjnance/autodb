@@ -2,7 +2,7 @@
 
 // If bInclude is set, echo report title and exit.
 if(isset($bInclude) && $bInclude) {
-	echo "Export Contacts as JSON"";
+	echo "Export Contacts as JSON";
 	exit(0);
 }
 
