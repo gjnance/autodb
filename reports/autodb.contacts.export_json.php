@@ -11,7 +11,7 @@ include("../adb_config.php");
 include("../adb_functions.php");
 
 // Debug causes the script to echo data instead of forcing a file download
-$debug = true;
+$debug = false;
 
 // Connect to the database
 $adb_dblink = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS);
