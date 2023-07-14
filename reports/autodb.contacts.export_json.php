@@ -33,7 +33,6 @@ $content = "Last Name, First Name, Email Address\n";
 $rows = array();
 
 while($row = mysqli_fetch_assoc($res)) {
-	//$content .= "{$row['cst_name_last']},{$row['cst_name_first']},{$row['cst_email']}\n";
 	$rows[] = $row;
 }
 
