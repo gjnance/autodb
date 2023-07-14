@@ -324,7 +324,3 @@ With the report in place, access the UI and select REPORTS from the `Action` dro
 Click the report link to download the currently selected rows as a JSON file.
 
 ![AutoDB Demo - JSON Report](https://github.com/gjnance/autodb/assets/7406768/f4599d1c-77e4-4f17-a89d-2b5bc695f539)
-
-
-
-
