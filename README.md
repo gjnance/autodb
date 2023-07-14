@@ -13,9 +13,9 @@ AutoDB is a relational database assistant tool written in PHP, JavaScript, and A
 
 ### Prerequisites
 
-* A webserver with a PHP module enabled
-* PHP >= 7.2 compiled with mysql support
-* MySQL Installation
+* A webserver with a PHP module installed and enabled
+* PHP >= 7.2 compiled with MySQL support
+* MySQL Installed
 
 The following commands were used to successfully deploy this tool on an Azure VM instance running `Ubuntu 22.04.2 LTS`. (See guide [Here](https://www.digitalocean.com/community/tutorials/how-to-install-linux-nginx-mysql-php-lemp-stack-on-ubuntu-22-04) for more detailed instructions on setting up a LEMP stack).
 
@@ -76,10 +76,12 @@ $ sudo systemctl reload nginx
 Create a file at /var/www/adb/index.php with the following contents:
 
 ```
-<?php phpinfo(); ?>
+<?= phpinfo(); ?>
 ```
 
-Ensure that you can now access the web server at `http://<public_ip_address>/`. You should see the PHP info page, if everything worked properly. This is also a good time to scroll through the output and ensure that mysqli support is present.
+Ensure that you can now access the web server at `http://<public_ip_address>/`. If everything worked properly, you should see the PHP info page. This is also a good time to scroll through the output and ensure that mysqli support is present:
+
+![phpinfo_mysqli](https://github.com/gjnance/autodb/assets/7406768/17a5ca93-f71a-42ce-8ae6-fb668e33d488)
 
 #### .htaccess Configuration
 
@@ -172,7 +174,9 @@ mysql> show tables;
 2 rows in set (0.00 sec)
 ```
 
-You should now be able to access AutoDB in your web browser, and should see the two autodb tables present.
+Access AutoDB in your web browser and verify that the two tables are present.
+
+![AutoDB Initial Tables](https://github.com/gjnance/autodb/assets/7406768/00ea1f10-2a5c-4824-a964-13290425939c)
 
 ## AutoDB Usage
 
@@ -182,13 +186,17 @@ The remainder of this document assumes a functioning AutoDB installation with th
 mysql> source ./sql/demo.sql
 ```
 
+Refresh AutoDB in your browser and select the `contacts` table, which should look like the screenshot below.
+
+![Contacts Table Without Relational Rules](https://github.com/gjnance/autodb/assets/7406768/3179c81b-0035-4a06-98b7-b46315a08f51)
+
 ### Relational Rules
 
 One of AutoDB's most useful features is the ability to id columns from relational tables. This is useful when you have a column in a table which is an integer `id` that links to another table. In SELECT example above, the `locality_id`, `region_id`, and `country_id` columns are displayed as integers, which is not terribly useful. Further, when inserting new data, you must know the proper `id` to specify from the adjoining table in order to link the two. AutoDB Relational Rules take the guesswork out of this by providing mappings between tables.
 
-To link the `locality_id`, `region_id`, and `country_id` columns to their respective tables, create the following entries in the `autodb_rules` table:
+To link the `locality_id`, `region_id`, and `country_id` columns to their respective tables, create the following entries in the `autodb_rules` table by selecting `INSERT` from the `Actions` menu and completing the form per the rules below.
 
-![AutoDB Example Rules](https://github.com/gjnance/autodb/assets/7406768/11bef4b4-d14a-471e-a447-a9c0f56b42c1)
+![AutoDB Demo - Rules](https://github.com/gjnance/autodb/assets/7406768/8e70dccf-da6d-482d-b8eb-6f50042befb3)
 
 The columns in autodb_rules are explained below.
 
@@ -207,19 +215,15 @@ With the relational rules in place, when displaying the `contacts` table now ins
 
 Hovering over the relational entry will display the actual id contained in the column for that row.
 
-![AutoDB Example Rules Demo](https://github.com/gjnance/autodb/assets/7406768/1c5d86a2-18a8-410e-91e7-c4cbcea2d24c)
-
 ### Operations
 
 #### SELECT Mode
 
-When you first log into the UI, you should be presented with a simple drop-down asking you to select a database, if AUTODB_DB is not set in `adb_config.php`, or a table from the specified database if it has been.
-
-![SELECT Mode Demo Image 1](https://github.com/gjnance/autodb/assets/7406768/5488492e-c2f3-478c-bd4b-174749ee69fe)
+Use the `SELECT` Action from the The `Actions` drop down of the Actions Bar to select table rows for the current table.
 
 Select the `contacts` database to see a list of 30 beloved comic book characters and their contact info (as provided by [ChatGPT-4](https://chat.openai.com/share/6aa8535b-e720-4aa3-85c8-2de16eef7dca)).
 
-![SELECT Mode Demo Image 2](https://github.com/gjnance/autodb/assets/7406768/104b9dde-eeb1-4f2d-a0a2-3598f1f9a48c)
+![AutoDB SELECT Demo](https://github.com/gjnance/autodb/assets/7406768/fb248d14-ffaf-47c9-91ad-e6c739c3384a)
 
 #### INSERT Mode
 
@@ -229,7 +233,7 @@ From the `Action` drop-down at the top of the page, select INSERT to display a f
 * Display required fields in red (determined by Null=NO)
 * For relational columns, display a drop-down of choices pulled from an adjacent table rather than an integer (see [Relational Rules](./README.md#relational-rules])).
 
-![INSERT Mode Demo Image 1](https://github.com/gjnance/autodb/assets/7406768/a5f007e3-9c07-45fa-ab90-6c19c63ff3b2)
+![INSERT Mode Demo Image](https://github.com/gjnance/autodb/assets/7406768/e4873722-1c31-4ab9-afe8-6f826da78466)
 
 #### EXPORT Mode
 
@@ -239,13 +243,17 @@ AutoDB supports exporting of displayed table data using the EXPORT Action. Simpl
 
 AutoDB provides a WHERE text box in the action bar that can be used to refine the rows displayed to any valid MySQL query. Use the WHERE field to select contacts whose phone numbers begin with the area code `415`.
 
-TODO: screenshot
+![AutoDB - WHERE Demo](https://github.com/gjnance/autodb/assets/7406768/06bddf7c-9a56-429e-99d7-78e9ebf8f264)
+
+#### LIMIT
+
+The `LIMIT` drop-down of the `Actions` bar allows you to limit the number of rows displayed for the selected table. The LIMIT clause also applies when exporting data (via the EXPORT option) as well as for report generation. The default behavior is to display the first 100 Rows.
 
 #### REPORT Mode
 
 AutoDB provides a simple mechanism for creating custom reports or pages based on displayed table data. Reports are dynamically discovered by AutoDB based on a filename convention and are a useful way to customize data presentation.
 
-This is best illustrated with an example. Given the table from the demo above, we will create a custom report to send back a JSON formatted file of selected entries, taking LIMIT, ORDER, and WHERE into consideration, and send it back to the user's web browser.
+This is best illustrated with an example. Given the table from the demo above, we will create a custom report to send back a JSON formatted file of selected entries, taking LIMIT, ORDER, and WHERE into consideration.
 
 The first step is to create the report PHP file, which should be named:
 
@@ -291,7 +299,6 @@ $content = "Last Name, First Name, Email Address\n";
 $rows = array();
 
 while($row = mysqli_fetch_assoc($res)) {
-        //$content .= "{$row['cst_name_last']},{$row['cst_name_first']},{$row['cst_email']}\n";
         $rows[] = $row;
 }
 
@@ -310,4 +317,14 @@ if($debug) {
 ?>
 ```
 
-With the report in place, access the UI and select REPORTS from the `Action` drop-down. You should see the title of the report, `Export Contacts as JSON`, which you can now click, resulting in a JSON file containing the selected table data.
+With the report in place, access the UI and select REPORTS from the `Action` drop-down. You should see the title of the report, `Export Contacts as JSON` as shown here.
+
+![AutoDB Demo - Report](https://github.com/gjnance/autodb/assets/7406768/746facd2-1aed-44fa-a2e9-a5eb88af9026)
+
+Click the report link to download the currently selected rows as a JSON file.
+
+![AutoDB Demo - JSON Report](https://github.com/gjnance/autodb/assets/7406768/f4599d1c-77e4-4f17-a89d-2b5bc695f539)
+
+
+
+
