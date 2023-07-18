@@ -42,7 +42,7 @@ resource "azurerm_subnet" "example" {
   name                 = "internal"
   resource_group_name  = azurerm_resource_group.example.name
   virtual_network_name = azurerm_virtual_network.example.name
-  address_prefixes     = ["10.0.0.0/24"]
+  address_prefixes     = ["10.0.0.1/24"]
 }
 
 resource "azurerm_network_interface" "example" {
@@ -54,7 +54,7 @@ resource "azurerm_network_interface" "example" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.example.id
     private_ip_address_allocation = "Static"
-    private_ip_address            = "10.0.0.1"
+    private_ip_address            = "10.0.0.10"
     public_ip_address_id          = azurerm_public_ip.example.id
   }
 }
