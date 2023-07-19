@@ -1,6 +1,7 @@
 # cloud-config
+# See /var/log/cloud-init.log
 packages:
   - nginx php8.1-fpm php-mysql
 
 runcmd:
-  - echo "AutoDB cloud-init.yaml completed successfully" > /var/tmp/adb-cloud-init.log
+  - echo "AutoDB cloud-init.yaml completed successfully" > /var/log/adb-cloud-init.log
