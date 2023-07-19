@@ -91,7 +91,7 @@ resource "azurerm_linux_virtual_machine" "autodb" {
   ]
 
   admin_ssh_key {
-    username   = "adminuser"
+    username   = var.vm_admin_username
     public_key = tls_private_key.autodb.public_key_openssh
   }
 

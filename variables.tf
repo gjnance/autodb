@@ -1,6 +1,6 @@
 variable "vm_admin_username" {
   type = string
-  default = "azueruser"
+  default = "adbuser"
 }
 variable "mysql_administrator_login" {
     type = string
