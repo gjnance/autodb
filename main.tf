@@ -119,7 +119,7 @@ resource "azurerm_linux_virtual_machine" "autodb" {
     connection {
       type        = "ssh"
       user        = var.vm_admin_username
-      host        = azurerm_public_ip.main.ip_address
+      host        = azurerm_public_ip.autodb.ip_address
       private_key = tls_private_key.autodb.private_key_pem
       agent       = false
       timeout     = "2m"
@@ -166,10 +166,10 @@ resource "azurerm_network_interface_security_group_association" "autodb" {
 }
 
 # Azure MySQL Server
-# resource "azurerm_mysql_server" "main" {
+# resource "azurerm_mysql_server" "autodb" {
 #   name                              = "${var.prefix}-mysqlserver"
-#   location                          = azurerm_resource_group.main.location
-#   resource_group_name               = azurerm_resource_group.main.name
+#   location                          = azurerm_resource_group.autodb.location
+#   resource_group_name               = azurerm_resource_group.autodb.name
 #   administrator_login               = var.mysql_administrator_login
 #   administrator_login_password      = var.mysql_administrator_login_password
 #   sku_name                          = "B_Gen5_2"
