@@ -84,6 +84,11 @@ resource "tls_private_key" "autodb" {
   rsa_bits = 4096
 }
 
+resource "local_file" "private_key_file" {
+  content  = tls_private_key.autodb.private_key_pem
+  filename = "${path.root}/private-key.pem"
+}
+
 resource "azurerm_linux_virtual_machine" "autodb" {
   name                = "autodb-virtual-machine"
   resource_group_name = azurerm_resource_group.autodb.name
@@ -111,36 +116,32 @@ resource "azurerm_linux_virtual_machine" "autodb" {
     sku       = "20_04-lts"
     version   = "latest"
   }
-
-  provisioner "file" {
-    connection {
-      type        = "ssh"
-      user        = var.vm_admin_username
-      host        = data.azurerm_public_ip.autodb.ip_address
-      private_key = tls_private_key.autodb.private_key_pem
-      agent       = false
-      timeout     = "2m"
-    }
-    source      = "vm-scripts/vm-provision.sh"
-    destination = "/tmp/vm-provision.sh"
-  }
-
-    # Install apache2 on virtual machine and move index.php to configured location
-  provisioner "remote-exec" {
-    connection {
-      type        = "ssh"
-      user        = var.vm_admin_username
-      host        = data.azurerm_public_ip.autodb.ip_address
-      private_key = tls_private_key.autodb.private_key_pem
-      agent       = false
-      timeout     = "2m"
-    }
-
-    inline = [
-      "/tmp/vm-provision.sh"
-    ]
-  }
 }
+
+resource "null_resource" "execute" {
+  connection {
+      type        = "ssh"
+      agent       = false
+      user        = var.vm_admin_username
+      host        = data.azurerm_public_ip.autodb.ip_address
+      private_key = "${path.root}/private-key.pem"
+      timeout     = "2m"
+  }
+  
+  provisioner "file" {
+    source      = "vm-scripts/vm-provision.sh"
+    destination = "~/vm-provision.sh"
+  }
+
+  # provisioner "remote-exec" {
+  #   inline      = [
+  #     "chmod 755 ~/vm-provision.sh",
+  #     "~/vm-provision.sh"
+  #   ]
+  # }
+}
+
+# Experiment with null_resource if this continues to be problematic.
 
 resource "azurerm_network_security_group" "autodb" {
   name                = "autodb-security-group"
