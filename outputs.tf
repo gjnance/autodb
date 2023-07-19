@@ -1,9 +1,9 @@
 output "resource_group_id" {
-  value = azurerm_resource_group.example.id
+  value = azurerm_resource_group.autodb.id
 }
 output "virtual_network_id" {
-  value = azurerm_virtual_network.example.id
+  value = azurerm_virtual_network.autodb.id
 }
 output "public_ip_address" {
-  value = azurerm_public_ip.example.ip_address
+  value = azurerm_public_ip.autodb.ip_address
 }
