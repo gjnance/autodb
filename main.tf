@@ -26,7 +26,8 @@ provider "azurerm" {
   features {}
 }
 
-provider "tls" {}
+provider "tls" {
+}
 
 resource "azurerm_resource_group" "autodb" {
   name     = "autodb-resource-group"
@@ -124,7 +125,7 @@ resource "null_resource" "execute" {
       agent       = false
       user        = var.vm_admin_username
       host        = data.azurerm_public_ip.autodb.ip_address
-      private_key = "${path.root}/private-key.pem"
+      private_key = local_file.private_key_file.filename
       timeout     = "2m"
   }
   
@@ -139,9 +140,8 @@ resource "null_resource" "execute" {
   #     "~/vm-provision.sh"
   #   ]
   # }
+  depends_on = [azurerm_linux_virtual_machine.autodb]
 }
-
-# Experiment with null_resource if this continues to be problematic.
 
 resource "azurerm_network_security_group" "autodb" {
   name                = "autodb-security-group"
