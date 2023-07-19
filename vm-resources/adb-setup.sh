@@ -1,9 +1,12 @@
 #!/bin/bash -ex
 # Logs to /var/log/cloud-init-output.log
-echo "AutoDB: Executing $(basename "$0") as $USER"
+echo "AutoDB: Executing $(basename "$0") as $(whoami)"
 
 NGINX_ROOT=/var/www
 APP_DIR=$NGINX_ROOT/autodb
+
+echo "AutoDB: Script environment"
+env
 
 echo "AutoDB: Installing required packages"
 sudo apt-get update -y
