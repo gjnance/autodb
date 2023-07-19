@@ -74,6 +74,11 @@ resource "azurerm_public_ip" "autodb" {
   idle_timeout_in_minutes = 30
 }
 
+data "azurerm_public_ip" "autodb" {
+  name                = azurerm_public_ip.autodb.name
+  resource_group_name = azurerm_resource_group.autodb.name
+}
+
 resource "tls_private_key" "autodb" {
   algorithm = "RSA"
   rsa_bits = 4096
