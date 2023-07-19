@@ -75,11 +75,6 @@ resource "azurerm_public_ip" "autodb" {
   idle_timeout_in_minutes = 30
 }
 
-data "azurerm_public_ip" "autodb" {
-  name                = azurerm_public_ip.autodb.name
-  resource_group_name = azurerm_resource_group.autodb.name
-}
-
 # ssh -i ./vm-resources/tf-cloud-init.key adbuser@<public_ip>
 resource "azurerm_linux_virtual_machine" "autodb" {
   name                = "autodb-virtual-machine"
