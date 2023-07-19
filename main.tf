@@ -9,6 +9,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.0.2"
     }
+    tls = {
+      source = "hashicorp/tls"
+      version = "4.0.4"
+    }
   }
   cloud {
     organization = "Nance"
@@ -21,6 +25,8 @@ terraform {
 provider "azurerm" {
   features {}
 }
+
+provider "tls" {}
 
 resource "azurerm_resource_group" "autodb" {
   name     = "autodb-resource-group"
