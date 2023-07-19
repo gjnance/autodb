@@ -80,16 +80,6 @@ data "azurerm_public_ip" "autodb" {
   resource_group_name = azurerm_resource_group.autodb.name
 }
 
-resource "tls_private_key" "autodb" {
-  algorithm = "RSA"
-  rsa_bits = 4096
-}
-
-resource "local_file" "private_key_file" {
-  content  = tls_private_key.autodb.private_key_pem
-  filename = "${path.root}/private-key.pem"
-}
-
 resource "azurerm_linux_virtual_machine" "autodb" {
   name                = "autodb-virtual-machine"
   resource_group_name = azurerm_resource_group.autodb.name
@@ -103,7 +93,7 @@ resource "azurerm_linux_virtual_machine" "autodb" {
 
   admin_ssh_key {
     username   = var.vm_admin_username
-    public_key = tls_private_key.autodb.public_key_openssh
+    public_key = file("${path.module}/vm-resources/tf-cloud-init.pub")
   }
 
   os_disk {
@@ -117,30 +107,8 @@ resource "azurerm_linux_virtual_machine" "autodb" {
     sku       = "20_04-lts"
     version   = "latest"
   }
-}
 
-resource "null_resource" "execute" {
-  connection {
-      type        = "ssh"
-      agent       = false
-      user        = var.vm_admin_username
-      host        = data.azurerm_public_ip.autodb.ip_address
-      private_key = local_file.private_key_file.filename
-      timeout     = "2m"
-  }
-  
-  provisioner "file" {
-    source      = "vm-scripts/vm-provision.sh"
-    destination = "~/vm-provision.sh"
-  }
-
-  # provisioner "remote-exec" {
-  #   inline      = [
-  #     "chmod 755 ~/vm-provision.sh",
-  #     "~/vm-provision.sh"
-  #   ]
-  # }
-  depends_on = [azurerm_linux_virtual_machine.autodb]
+  custom_data = filebase64("${path.module}/vm-resources/cloud-init.yaml")
 }
 
 resource "azurerm_network_security_group" "autodb" {
@@ -176,21 +144,3 @@ resource "azurerm_network_interface_security_group_association" "autodb" {
   network_interface_id         = azurerm_network_interface.autodb.id
   network_security_group_id    = azurerm_network_security_group.autodb.id
 }
-
-# Azure MySQL Server
-# resource "azurerm_mysql_server" "autodb" {
-#   name                              = "${var.prefix}-mysqlserver"
-#   location                          = azurerm_resource_group.autodb.location
-#   resource_group_name               = azurerm_resource_group.autodb.name
-#   administrator_login               = var.mysql_administrator_login
-#   administrator_login_password      = var.mysql_administrator_login_password
-#   sku_name                          = "B_Gen5_2"
-#   storage_mb                        = 5120
-#   version                           = "5.7"
-#   auto_grow_enabled                 = true
-#   backup_retention_days             = 7
-#   geo_redundant_backup_enabled      = false
-#   //public_network_access_enabled   = false
-#   ssl_enforcement_enabled           = true
-#   ssl_minimal_tls_version_enforced  = "TLS1_2"
-# }

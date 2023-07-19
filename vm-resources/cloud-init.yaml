@@ -1,0 +1,6 @@
+# cloud-config
+packages:
+  - nginx php8.1-fpm php-mysql
+
+runcmd:
+  - echo "AutoDB cloud-init.yaml completed successfully" > /var/tmp/adb-cloud-init.log
