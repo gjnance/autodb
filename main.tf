@@ -106,7 +106,7 @@ resource "azurerm_linux_virtual_machine" "autodb" {
       type        = "ssh"
       user        = var.vm_admin_username
       host        = azurerm_public_ip.autodb.ip_address
-      private_key = tls_private_key.main_ssh.private_key_pem
+      private_key = tls_private_key.autodb.private_key_pem
       agent       = false
       timeout     = "2m"
     }
@@ -120,7 +120,7 @@ resource "azurerm_linux_virtual_machine" "autodb" {
       type        = "ssh"
       user        = var.vm_admin_username
       host        = azurerm_public_ip.main.ip_address
-      private_key = tls_private_key.main_ssh.private_key_pem
+      private_key = tls_private_key.autodb.private_key_pem
       agent       = false
       timeout     = "2m"
     }
