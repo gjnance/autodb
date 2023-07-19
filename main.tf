@@ -149,5 +149,5 @@ resource "azurerm_mysql_flexible_server" "autodb" {
   administrator_password = var.mysql_administrator_login_password
   backup_retention_days  = 7
   delegated_subnet_id    = azurerm_subnet.autodb.id
-  sku_name               = "Standard_B1s"
+  sku_name               = "B_Standard_B1s"
 }
