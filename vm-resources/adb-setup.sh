@@ -1,5 +1,6 @@
 #!/bin/bash -e
-set -e
+set -ex
+
 sudo apt-get update -y
 sudo apt-get install -y nginx php8.1-fpm php-mysql
 
