@@ -109,7 +109,7 @@ resource "azurerm_linux_virtual_machine" "autodb" {
     version   = "latest"
   }
 
-  custom_data = filebase64("${path.module}/vm-resources/cloud-init.yaml")
+  custom_data = filebase64("${path.module}/vm-resources/adb-setup.sh")
 }
 
 resource "azurerm_network_security_group" "autodb" {
