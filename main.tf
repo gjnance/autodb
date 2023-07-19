@@ -80,6 +80,7 @@ data "azurerm_public_ip" "autodb" {
   resource_group_name = azurerm_resource_group.autodb.name
 }
 
+# ssh -i ./vm-resources/tf-cloud-init.key adbuser@4.154.130.50
 resource "azurerm_linux_virtual_machine" "autodb" {
   name                = "autodb-virtual-machine"
   resource_group_name = azurerm_resource_group.autodb.name
