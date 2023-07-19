@@ -72,15 +72,17 @@ resource "azurerm_linux_virtual_machine" "example" {
   name                = "example-virtual-machine"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
-  size                = "Standard_F2"
+  size                = "Standard_B1s"
   admin_username      = "adminuser"
+  disable_password_authentication = false
+
   network_interface_ids = [
     azurerm_network_interface.example.id,
   ]
 
   admin_ssh_key {
     username   = "adminuser"
-    public_key = file("resources/id_rsa.pub")
+    public_key = file("vm-resources/id_rsa.pub")
   }
 
   os_disk {
@@ -94,6 +96,10 @@ resource "azurerm_linux_virtual_machine" "example" {
     sku       = "20_04-lts"
     version   = "latest"
   }
+
+  # This is where we pass our cloud-init.
+  custom_data = ""
+
 }
 
 resource "azurerm_network_security_group" "example" {
