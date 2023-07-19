@@ -140,3 +140,14 @@ resource "azurerm_network_interface_security_group_association" "autodb" {
   network_interface_id         = azurerm_network_interface.autodb.id
   network_security_group_id    = azurerm_network_security_group.autodb.id
 }
+
+resource "azurerm_mysql_flexible_server" "autodb" {
+  name                   = "autodb-mysql-server"
+  resource_group_name    = azurerm_resource_group.autodb.name
+  location               = azurerm_resource_group.autodb.location
+  administrator_login    = var.mysql_administrator_login
+  administrator_password = var.mysql_administrator_login_password
+  backup_retention_days  = 7
+  delegated_subnet_id    = azurerm_subnet.autodb.id
+  sku_name               = "Standard_B1s"
+}
