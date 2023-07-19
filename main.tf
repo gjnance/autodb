@@ -50,6 +50,27 @@ resource "azurerm_subnet" "autodb" {
   resource_group_name  = azurerm_resource_group.autodb.name
   virtual_network_name = azurerm_virtual_network.autodb.name
   address_prefixes     = ["10.0.0.0/24"]
+  delegation {
+    name = "fs"
+    service_delegation {
+      name = "Microsoft.DBforMySQL/flexibleServers"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+      ]
+    }
+  }
+}
+
+resource "azurerm_private_dns_zone" "autodb" {
+  name                = "autodb-mysql.mysql.database.azure.com"
+  resource_group_name = azurerm_resource_group.example.name
+}
+
+resource "azurerm_private_dns_zone_virtual_network_link" "autodb" {
+  name                  = "autodb-vnet-zone.com"
+  private_dns_zone_name = azurerm_private_dns_zone.autodb.name
+  virtual_network_id    = azurerm_virtual_network.autodb.id
+  resource_group_name   = azurerm_resource_group.autodb.name
 }
 
 resource "azurerm_network_interface" "autodb" {
@@ -149,5 +170,8 @@ resource "azurerm_mysql_flexible_server" "autodb" {
   administrator_password = var.mysql_administrator_login_password
   backup_retention_days  = 7
   delegated_subnet_id    = azurerm_subnet.autodb.id
+  private_dns_zone_id    = azurerm_private_dns_zone.autodb.id
   sku_name               = "B_Standard_B1s"
+
+  depends_on = [azurerm_private_dns_zone_virtual_network_link.autodb]
 }
