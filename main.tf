@@ -63,7 +63,7 @@ resource "azurerm_subnet" "autodb" {
 
 resource "azurerm_private_dns_zone" "autodb" {
   name                = "autodb-mysql.mysql.database.azure.com"
-  resource_group_name = azurerm_resource_group.example.name
+  resource_group_name = azurerm_resource_group.autodb.name
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "autodb" {
