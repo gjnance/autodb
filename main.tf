@@ -96,10 +96,6 @@ resource "azurerm_linux_virtual_machine" "example" {
     sku       = "20_04-lts"
     version   = "latest"
   }
-
-  # This is where we pass our cloud-init.
-  custom_data = ""
-
 }
 
 resource "azurerm_network_security_group" "example" {
