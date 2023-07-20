@@ -39,7 +39,7 @@ resource "azurerm_resource_group" "autodb" {
 }
 
 resource "azurerm_virtual_network" "autodb" {
-  name                = "autodb-network"
+  name                = "autodb-vnet"
   address_space       = ["10.0.0.0/16"]
   location            = azurerm_resource_group.autodb.location
   resource_group_name = azurerm_resource_group.autodb.name
@@ -49,14 +49,14 @@ resource "azurerm_subnet" "autodb" {
   name                 = "vnet-internal"
   resource_group_name  = azurerm_resource_group.autodb.name
   virtual_network_name = azurerm_virtual_network.autodb.name
-  address_prefixes     = ["10.0.0.0/24"]
+  address_prefixes     = ["10.0.10.0/16"]
 }
 
 resource "azurerm_subnet" "autodb-mysql" {
   name                 = "vnet-mysql"
   resource_group_name  = azurerm_resource_group.autodb.name
   virtual_network_name = azurerm_virtual_network.autodb.name
-  address_prefixes     = ["20.0.0.0/24"]
+  address_prefixes     = ["10.0.20.0/24"]
   service_endpoints    = ["Microsoft.Storage"]
 
   delegation {
@@ -71,6 +71,20 @@ resource "azurerm_subnet" "autodb-mysql" {
   }
 }
 
+resource "azurerm_network_interface" "autodb" {
+  name                = "autodb-nic"
+  location            = azurerm_resource_group.autodb.location
+  resource_group_name = azurerm_resource_group.autodb.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.autodb.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "10.0.10.10"
+    public_ip_address_id          = azurerm_public_ip.autodb.id
+  }
+}
+
 resource "azurerm_private_dns_zone" "autodb" {
   name                = "autodb-mysql.mysql.database.azure.com"
   resource_group_name = azurerm_resource_group.autodb.name
@@ -81,20 +95,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "autodb" {
   private_dns_zone_name = azurerm_private_dns_zone.autodb.name
   virtual_network_id    = azurerm_virtual_network.autodb.id
   resource_group_name   = azurerm_resource_group.autodb.name
-}
-
-resource "azurerm_network_interface" "autodb" {
-  name                = "autodb-nic"
-  location            = azurerm_resource_group.autodb.location
-  resource_group_name = azurerm_resource_group.autodb.name
-
-  ip_configuration {
-    name                          = "internal"
-    subnet_id                     = azurerm_subnet.autodb.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = "10.0.0.10"
-    public_ip_address_id          = azurerm_public_ip.autodb.id
-  }
 }
 
 resource "azurerm_public_ip" "autodb" {
