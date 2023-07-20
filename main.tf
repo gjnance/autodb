@@ -135,7 +135,7 @@ resource "azurerm_linux_virtual_machine" "autodb" {
     version   = "latest"
   }
 
-  custom_data = filebase64(templatefile("${path.module}/vm-resources/adb-setup.sh", {
+  custom_data = base64encode(templatefile("${path.module}/vm-resources/adb-setup.sh", {
     mysql_password = var.mysql_administrator_login_password
   }))
 }
