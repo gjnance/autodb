@@ -113,7 +113,8 @@ resource "azurerm_linux_virtual_machine" "autodb" {
   location            = azurerm_resource_group.autodb.location
   size                = "Standard_B1s"
   admin_username      = var.vm_admin_username
-
+  disable_password_authentication = true
+  
   network_interface_ids = [
     azurerm_network_interface.autodb.id,
   ]
