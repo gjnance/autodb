@@ -31,7 +31,7 @@ provider "tls" {
 
 resource "azurerm_resource_group" "autodb" {
   name     = "autodb-resource-group"
-  location = "West US 2"
+  location = "West US"
   tags = {
     Environment = "AutoDB Resource Group"
     Team = "Team Terminix"
@@ -175,7 +175,7 @@ resource "azurerm_network_interface_security_group_association" "autodb" {
 resource "azurerm_mysql_flexible_server" "autodb" {
   name                   = "autodb-mysql-server"
   resource_group_name    = azurerm_resource_group.autodb.name
-  location               = "East US 2"
+  location               = azurerm_resource_group.autodb.location
   administrator_login    = var.mysql_administrator_login
   administrator_password = var.mysql_administrator_login_password
   backup_retention_days  = 7
