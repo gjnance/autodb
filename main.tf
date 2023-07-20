@@ -49,7 +49,7 @@ resource "azurerm_subnet" "autodb" {
   name                 = "vnet-internal"
   resource_group_name  = azurerm_resource_group.autodb.name
   virtual_network_name = azurerm_virtual_network.autodb.name
-  address_prefixes     = ["10.0.10.0/16"]
+  address_prefixes     = ["10.0.10.0/24"]
 }
 
 resource "azurerm_subnet" "autodb-mysql" {
