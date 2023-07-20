@@ -31,7 +31,7 @@ provider "tls" {
 
 resource "azurerm_resource_group" "autodb" {
   name     = "autodb-resource-group"
-  location = "West US"
+  location = "East US"
   tags = {
     Environment = "AutoDB Resource Group"
     Team = "Team Terminix"
