@@ -46,10 +46,17 @@ resource "azurerm_virtual_network" "autodb" {
 }
 
 resource "azurerm_subnet" "autodb" {
-  name                 = "internal"
+  name                 = "vnet-internal"
   resource_group_name  = azurerm_resource_group.autodb.name
   virtual_network_name = azurerm_virtual_network.autodb.name
   address_prefixes     = ["10.0.0.0/24"]
+}
+
+resource "azurerm_subnet" "autodb-mysql" {
+  name                 = "vnet-mysql"
+  resource_group_name  = azurerm_resource_group.autodb.name
+  virtual_network_name = azurerm_virtual_network.autodb.name
+  address_prefixes     = ["20.0.0.0/24"]
   service_endpoints    = ["Microsoft.Storage"]
 
   delegation {
@@ -172,7 +179,7 @@ resource "azurerm_mysql_flexible_server" "autodb" {
   administrator_login    = var.mysql_administrator_login
   administrator_password = var.mysql_administrator_login_password
   backup_retention_days  = 7
-  delegated_subnet_id    = azurerm_subnet.autodb.id
+  delegated_subnet_id    = azurerm_subnet.autodb-mysql.id
   private_dns_zone_id    = azurerm_private_dns_zone.autodb.id
   sku_name               = "B_Standard_B1s"
 
