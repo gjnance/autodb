@@ -135,7 +135,9 @@ resource "azurerm_linux_virtual_machine" "autodb" {
     version   = "latest"
   }
 
-  custom_data = filebase64("${path.module}/vm-resources/adb-setup.sh")
+  custom_data = templatefile("${path.module}/vm-resources/adb-setup.sh", {
+    mysql_password = var.mysql_administrator_login_password
+  })
 }
 
 resource "azurerm_network_security_group" "autodb" {
@@ -177,7 +179,7 @@ resource "azurerm_mysql_flexible_server" "autodb" {
   resource_group_name    = azurerm_resource_group.autodb.name
   location               = azurerm_resource_group.autodb.location
   administrator_login    = var.mysql_administrator_login
-  administrator_password = var.mysql_administrator_login_password
+  administrator_password = var.mysql_administrator_login_password_hash
   backup_retention_days  = 7
   delegated_subnet_id    = azurerm_subnet.autodb-mysql.id
   private_dns_zone_id    = azurerm_private_dns_zone.autodb.id

@@ -8,5 +8,9 @@ variable "mysql_administrator_login" {
 }
 variable "mysql_administrator_login_password" {
     type = string
-    default = "*2470C0C06DEE42FD1618BB99005ADCA2EC9D1E19" # password
+    default = "HT$al&MObU4Vl2c*"
+}
+variable "mysql_administrator_login_password_hash" {
+    type = string
+    default = "*2470C0C06DEE42FD1618BB99005ADCA2EC9D1E19"
 }

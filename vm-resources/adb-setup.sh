@@ -28,4 +28,7 @@ ln -s /etc/nginx/sites-available/autodb /etc/nginx/sites-enabled/
 unlink /etc/nginx/sites-enabled/default
 systemctl reload nginx
 
+# Initialize MySQL Database and tables
+mysql -h autodb-mysql-server.mysql.database.azure.com -u autodb_user -p'${mysql_password}' < autodb.sql 
+
 echo "AutoDB: cloud-init.yaml completed successfully" > /var/log/adb-cloud-init.log
