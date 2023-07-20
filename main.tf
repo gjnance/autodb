@@ -17,7 +17,7 @@ terraform {
   cloud {
     organization = "Nance"
     workspaces {
-      name = "AutoDB"
+      name = "autodb-dev"
     }
   }
 }
