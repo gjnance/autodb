@@ -22,9 +22,9 @@ mkdir $APP_DIR
 cp -Rp ~/autodb/src/www/* $APP_DIR
 
 # Replace the placeholders with actual values
-sed -i "s/', MYSQL_HOST'/', ${MYSQL_HOST}'/g" $APP_DIR/adb_config.php
-sed -i "s/', MYSQL_USER'/', ${MYSQL_USER}'/g" $APP_DIR/adb_config.php
-sed -i "s/', MYSQL_PASS'/', ${MYSQL_PASS}'/g" $APP_DIR/adb_config.php
+sed -i "s/', 'MYSQL_HOST'/', '${MYSQL_HOST}'/g" $APP_DIR/adb_config.php
+sed -i "s/', 'MYSQL_USER'/', '${MYSQL_USER}'/g" $APP_DIR/adb_config.php
+sed -i "s/', 'MYSQL_PASS'/', '${MYSQL_PASS}'/g" $APP_DIR/adb_config.php
 
 # Setup webserver
 echo "AutoDB: Configuring NGINX"
