@@ -114,7 +114,7 @@ resource "azurerm_linux_virtual_machine" "autodb" {
   size                = "Standard_B1s"
   admin_username      = var.vm_admin_username
   disable_password_authentication = true
-  
+
   network_interface_ids = [
     azurerm_network_interface.autodb.id,
   ]
@@ -139,6 +139,11 @@ resource "azurerm_linux_virtual_machine" "autodb" {
   custom_data = base64encode(templatefile("${path.module}/vm-resources/adb-setup.sh", {
     mysql_password = var.mysql_administrator_login_password
   }))
+  
+  depends_on = [
+    azurerm_private_dns_zone_virtual_network_link.autodb,
+    azurerm_mysql_flexible_server.autodb
+  ]
 }
 
 resource "azurerm_network_security_group" "autodb" {
