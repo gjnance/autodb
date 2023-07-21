@@ -22,10 +22,14 @@ set_time_limit(60);
 mysqli_report(MYSQLI_REPORT_OFF);
 
 // Make database connection
-$adb_dblink = mysqli_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASS);
+$adb_dblink = mysqli_init();
 
-if (!$adb_dblink) {
-	die(Error('Connection error: ' . mysqli_connect_error()));
+mysqli_ssl_set($adb_dblink, NULL, NULL, NULL, NULL, NULL);
+$status = mysqli_real_connect($adb_dblink, MYSQL_HOST, MYSQL_USER, MYSQL_PASS,
+        port: 3306, flags: MYSQLI_CLIENT_SSL);
+
+if (!$status) {
+        die(Error('MySQL Connection Error: ' . mysqli_error()));
 }
 
 // Start buffering output
