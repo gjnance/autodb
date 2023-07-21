@@ -190,6 +190,7 @@ resource "azurerm_mysql_flexible_server" "autodb" {
   delegated_subnet_id    = azurerm_subnet.autodb-mysql.id
   private_dns_zone_id    = azurerm_private_dns_zone.autodb.id
   sku_name               = "B_Standard_B1s"
+  zone                   = 1
 
   depends_on = [azurerm_private_dns_zone_virtual_network_link.autodb]
 }
