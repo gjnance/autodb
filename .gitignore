@@ -2,3 +2,4 @@
 .DS_Store
 .terraform*
 vm-resources/tf-cloud-init.key
+TODO.txt
