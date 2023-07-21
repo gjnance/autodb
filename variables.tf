@@ -10,7 +10,3 @@ variable "mysql_administrator_login_password" {
     type = string
     default = ""
 }
-variable "mysql_administrator_login_password_hash" {
-    type = string
-    default = ""
-}

@@ -185,7 +185,7 @@ resource "azurerm_mysql_flexible_server" "autodb" {
   resource_group_name    = azurerm_resource_group.autodb.name
   location               = azurerm_resource_group.autodb.location
   administrator_login    = var.mysql_administrator_login
-  administrator_password = var.mysql_administrator_login_password_hash
+  administrator_password = var.mysql_administrator_login_password
   backup_retention_days  = 7
   delegated_subnet_id    = azurerm_subnet.autodb-mysql.id
   private_dns_zone_id    = azurerm_private_dns_zone.autodb.id
