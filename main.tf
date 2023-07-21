@@ -137,7 +137,7 @@ resource "azurerm_linux_virtual_machine" "autodb" {
   }
 
   custom_data = base64encode(templatefile("${path.module}/vm-resources/adb-setup.sh", {
-    MYSQL_HOST = azurerm_mysql_flexible_server.autodb.fqdn,
+    MYSQL_HOST = azurerm_private_dns_zone.autodb.name,
     MYSQL_USER = var.mysql_administrator_login,
     MYSQL_PASS = var.mysql_administrator_login_password
   }))
