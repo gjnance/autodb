@@ -1,7 +1,7 @@
 <?php
-define('MYSQL_HOST', 'localhost');
-define('MYSQL_USER', 'XXX');
-define('MYSQL_PASS', 'XXX');
+define('MYSQL_HOST', 'MYSQL_HOST');
+define('MYSQL_USER', 'MYSQL_USER');
+define('MYSQL_PASS', 'MYSQL_PASS');
 
 // AUTODB_TABLE should be a table that looks like the table 'autodb_tables' (below).
 define('AUTODB_REL', 'autodb.autodb_rules');
