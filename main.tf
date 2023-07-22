@@ -86,7 +86,7 @@ resource "azurerm_network_interface" "autodb" {
 }
 
 resource "azurerm_private_dns_zone" "autodb" {
-  name                = "autodb.com"
+  name                = "autodb.mysql.database.azure.com"
   resource_group_name = azurerm_resource_group.autodb.name
 }
 
