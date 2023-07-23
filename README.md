@@ -8,6 +8,8 @@ AutoDB is a relational database assistant tool written in PHP, JavaScript, and A
 * [AJAX](https://developer.mozilla.org/en-US/docs/Web/Guide/AJAX) / XMLHttpRequest for dynamic page updates
 * [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 * [MySQL](https://www.mysql.com/)
+* Terraform
+* Microsoft Azure
 
 ## Setup
 
