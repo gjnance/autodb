@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.33, for Linux (x86_64)
 --
--- Host: localhost    Database: autodb
+-- Host: autodb-mysql-server.mysql.database.azure.com    Database: autodb
 -- ------------------------------------------------------
--- Server version	8.0.33-0ubuntu0.22.04.2
+-- Server version	5.7.42-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,13 +29,13 @@ DROP TABLE IF EXISTS `autodb_prefs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `autodb_prefs` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `dbtable` varchar(128) DEFAULT NULL,
   `var` varchar(64) DEFAULT NULL,
   `value` varchar(64) DEFAULT NULL,
   `user` varchar(64) DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=220 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=224 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -55,5 +55,5 @@ CREATE TABLE `autodb_rules` (
   `adb_t2_relcol` varchar(128) NOT NULL DEFAULT '',
   `adb_t2_dspcol` varchar(128) NOT NULL DEFAULT '',
   PRIMARY KEY (`adb_t1`,`adb_t1_relcol`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
