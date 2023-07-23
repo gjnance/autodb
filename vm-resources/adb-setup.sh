@@ -15,7 +15,7 @@ apt-get install -y nginx php8.1-fpm php-mysql mysql-client
 
 # Clone git repository and copy application files
 echo "AutoDB: Cloning git repository"
-git clone -b deploy-via-terraform https://github.com/gjnance/autodb.git ~/autodb
+git clone -b dev-prod-test https://github.com/gjnance/autodb.git ~/autodb
 
 echo "AutoDB: Installing application files"
 mkdir $APP_DIR
