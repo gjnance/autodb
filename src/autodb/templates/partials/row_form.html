@@ -1,0 +1,103 @@
+<form {% if action == 'update' %}hx-put{% else %}hx-post{% endif %}="/data/{{ table_info.schema }}/{{ table_info.name }}"
+      hx-target="#modal-content"
+      hx-swap="innerHTML"
+      class="space-y-4">
+
+    {% for column in table_info.columns %}
+    <div class="{% if column.name in relations %}suggestion-container relative{% endif %}">
+        <label for="{{ column.name }}" class="block text-sm font-medium mb-1 {% if column.is_required and action == 'insert' %}text-red-600 dark:text-red-400{% endif %}">
+            {{ column.name }}
+            {% if column.is_primary_key %}
+            <span class="text-yellow-500" title="Primary Key">🔑</span>
+            {% endif %}
+            {% if column.name in relations %}
+            <span class="text-purple-500" title="Relational field">🔗</span>
+            {% endif %}
+            {% if column.is_required and action == 'insert' %}
+            <span class="text-red-500">*</span>
+            {% endif %}
+            <span class="text-gray-400 text-xs ml-2">({{ column.data_type }})</span>
+        </label>
+
+        {% if column.is_auto_increment %}
+        {# Auto-increment fields are read-only #}
+        <input type="text"
+               name="{{ column.name }}"
+               value="{{ row[column.name] if row else '' }}"
+               disabled
+               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-600 bg-gray-100 shadow-sm cursor-not-allowed">
+        {% if action == 'update' %}
+        <input type="hidden" name="_pk_{{ column.name }}" value="{{ row[column.name] }}">
+        {% endif %}
+
+        {% elif column.data_type == 'text' %}
+        {# Text area for TEXT type #}
+        <textarea name="{{ column.name }}"
+                  rows="3"
+                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ row[column.name] if row and row[column.name] else '' }}</textarea>
+
+        {% elif column.data_type == 'boolean' %}
+        {# Checkbox for BOOLEAN #}
+        <input type="checkbox"
+               name="{{ column.name }}"
+               value="true"
+               {% if row and row[column.name] %}checked{% endif %}
+               class="rounded border-gray-300 dark:border-gray-600 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+
+        {% elif column.data_type in ['date', 'timestamp', 'timestamp without time zone', 'timestamp with time zone'] %}
+        {# Date/datetime picker #}
+        <input type="{% if 'timestamp' in column.data_type %}datetime-local{% else %}date{% endif %}"
+               name="{{ column.name }}"
+               value="{{ row[column.name] | string if row and row[column.name] else '' }}"
+               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+
+        {% elif column.data_type == 'time' or column.data_type == 'time without time zone' %}
+        {# Time picker #}
+        <input type="time"
+               name="{{ column.name }}"
+               value="{{ row[column.name] | string if row and row[column.name] else '' }}"
+               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+
+        {% elif column.name in relations %}
+        {# Relational field with auto-complete #}
+        <input type="text"
+               name="{{ column.name }}"
+               value="{{ row[column.name] if row and row[column.name] else '' }}"
+               autocomplete="off"
+               oninput="showSuggestions(this, '{{ column.name }}')"
+               onkeydown="handleSuggestionKeydown(event, '{{ column.name }}')"
+               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <div id="suggestions-{{ column.name }}"
+             class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 overflow-y-auto">
+        </div>
+        <p class="text-xs text-gray-500 mt-1">
+            Related to: {{ relations[column.name].related_table }}.{{ relations[column.name].display_column }}
+        </p>
+
+        {% else %}
+        {# Default text input #}
+        <input type="{% if column.data_type in ['integer', 'bigint', 'smallint', 'numeric', 'decimal', 'real', 'double precision'] %}number{% else %}text{% endif %}"
+               name="{{ column.name }}"
+               value="{{ row[column.name] if row and row[column.name] is not none else '' }}"
+               {% if column.data_type in ['numeric', 'decimal', 'real', 'double precision'] %}step="any"{% endif %}
+               {% if column.character_maximum_length %}maxlength="{{ column.character_maximum_length }}"{% endif %}
+               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        {% endif %}
+
+        {% if action == 'update' and column.is_primary_key and not column.is_auto_increment %}
+        <input type="hidden" name="_pk_{{ column.name }}" value="{{ row[column.name] }}">
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    <div class="flex justify-end gap-3 pt-4 border-t dark:border-gray-600">
+        <button type="button" onclick="closeModal()"
+                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
+            Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            {% if action == 'update' %}Update{% else %}Insert{% endif %}
+        </button>
+    </div>
+</form>

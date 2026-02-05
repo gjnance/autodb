@@ -1,0 +1,67 @@
+/* AutoDB Custom Styles */
+/* Most styling is handled by Tailwind CSS */
+
+/* Loading spinner for HTMX requests */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 200ms ease-in;
+}
+
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}
+
+/* Relational value highlighting */
+.relation-value {
+    font-style: italic;
+    color: #9333ea;
+}
+
+.dark .relation-value {
+    color: #c084fc;
+}
+
+/* Suggestion dropdown */
+.suggestion-item {
+    cursor: pointer;
+    transition: background-color 150ms ease;
+}
+
+.suggestion-item:hover,
+.suggestion-item.highlighted {
+    background-color: #e5e7eb;
+}
+
+.dark .suggestion-item:hover,
+.dark .suggestion-item.highlighted {
+    background-color: #374151;
+}
+
+/* Table styles */
+table {
+    border-collapse: collapse;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+/* Form validation */
+input:invalid {
+    border-color: #ef4444;
+}
+
+/* Smooth transitions */
+* {
+    transition-property: color, background-color, border-color;
+    transition-duration: 150ms;
+    transition-timing-function: ease;
+}
+
+/* Prevent transition on page load */
+.preload * {
+    transition: none !important;
+}

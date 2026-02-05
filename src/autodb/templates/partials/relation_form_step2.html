@@ -1,0 +1,92 @@
+<!-- Step 2: Select Lookup (the table to look up the display value) -->
+<form hx-post="/relations"
+      hx-target="#modal-content"
+      hx-swap="innerHTML"
+      class="space-y-4">
+
+    <!-- Hidden fields for source data -->
+    <input type="hidden" name="source_schema" value="{{ source_schema }}">
+    <input type="hidden" name="source_table" value="{{ source_table }}">
+    <input type="hidden" name="source_column" value="{{ source_column }}">
+
+    <!-- Progress indicator -->
+    <div class="flex items-center justify-center mb-6">
+        <div class="flex items-center">
+            <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <div class="w-16 h-1 bg-indigo-600 mx-2"></div>
+            <div class="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-medium">2</div>
+        </div>
+    </div>
+
+    <!-- Source summary -->
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-md p-3 mb-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+            <span class="font-medium">Source:</span>
+            <code class="ml-2 bg-gray-200 dark:bg-gray-600 px-2 py-0.5 rounded">{{ source_schema }}.{{ source_table }}.{{ source_column }}</code>
+        </p>
+    </div>
+
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        Select the <strong>lookup table</strong> - the table where we'll look up the display value for the numeric ID.
+    </p>
+
+    <!-- Schema select -->
+    <div>
+        <label for="target_schema" class="block text-sm font-medium mb-1">Schema</label>
+        <select id="target_schema" name="target_schema"
+                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                onchange="loadTablesForSelect('target_schema', 'target_table'); document.getElementById('target_column').innerHTML = '<option value=\'\'>Select column...</option>'; document.getElementById('display_column').innerHTML = '<option value=\'\'>Select column...</option>';">
+            <option value="">Select schema...</option>
+        </select>
+    </div>
+
+    <!-- Table select -->
+    <div>
+        <label for="target_table" class="block text-sm font-medium mb-1">Table</label>
+        <select id="target_table" name="target_table"
+                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                onchange="loadColumnsForSelect('target_schema', 'target_table', 'target_column'); loadColumnsForSelect('target_schema', 'target_table', 'display_column');">
+            <option value="">Select table...</option>
+        </select>
+    </div>
+
+    <!-- Lookup Column select (usually 'id') -->
+    <div>
+        <label for="target_column" class="block text-sm font-medium mb-1">Lookup Column (usually the primary key)</label>
+        <select id="target_column" name="target_column"
+                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value="">Select column...</option>
+        </select>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            This is typically the <code>id</code> column that matches the numeric value in your source.
+        </p>
+    </div>
+
+    <!-- Display Column select -->
+    <div>
+        <label for="display_column" class="block text-sm font-medium mb-1">Display Column</label>
+        <select id="display_column" name="display_column"
+                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value="">Select column...</option>
+        </select>
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            This is the human-readable value to display instead of the numeric ID (e.g., <code>name</code>).
+        </p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex justify-end gap-3 pt-4 border-t dark:border-gray-600">
+        <button type="button" onclick="closeModal()"
+                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
+            Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            Create Relation
+        </button>
+    </div>
+</form>

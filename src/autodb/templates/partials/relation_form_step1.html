@@ -1,0 +1,56 @@
+<!-- Step 1: Select Source (the table with the numeric ID) -->
+<div class="space-y-4">
+    <!-- Progress indicator -->
+    <div class="flex items-center justify-center mb-6">
+        <div class="flex items-center">
+            <div class="w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-medium">1</div>
+            <div class="w-16 h-1 bg-gray-300 dark:bg-gray-600 mx-2"></div>
+            <div class="w-8 h-8 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 rounded-full flex items-center justify-center text-sm font-medium">2</div>
+        </div>
+    </div>
+
+    <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        Select the <strong>source</strong> - the table and column that contains the numeric ID you want to look up.
+    </p>
+
+    <!-- Schema select -->
+    <div>
+        <label for="source_schema" class="block text-sm font-medium mb-1">Schema</label>
+        <select id="source_schema" name="source_schema"
+                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                onchange="loadTablesForSelect('source_schema', 'source_table'); document.getElementById('source_column').innerHTML = '<option value=\'\'>Select column...</option>';">
+            <option value="">Select schema...</option>
+        </select>
+    </div>
+
+    <!-- Table select -->
+    <div>
+        <label for="source_table" class="block text-sm font-medium mb-1">Table</label>
+        <select id="source_table" name="source_table"
+                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                onchange="loadColumnsForSelect('source_schema', 'source_table', 'source_column')">
+            <option value="">Select table...</option>
+        </select>
+    </div>
+
+    <!-- Column select -->
+    <div>
+        <label for="source_column" class="block text-sm font-medium mb-1">Column (with numeric ID)</label>
+        <select id="source_column" name="source_column"
+                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value="">Select column...</option>
+        </select>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex justify-end gap-3 pt-4 border-t dark:border-gray-600">
+        <button type="button" onclick="closeModal()"
+                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600">
+            Cancel
+        </button>
+        <button type="button" onclick="goToStep2()"
+                class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            Next
+        </button>
+    </div>
+</div>

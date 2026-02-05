@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ settings.app_title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        relation: {
+                            light: '#9333ea',
+                            dark: '#c084fc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+        }
+        .htmx-request.htmx-indicator {
+            display: inline-block;
+        }
+        .relation-value {
+            font-style: italic;
+            color: #9333ea;
+        }
+        .dark .relation-value {
+            color: #c084fc;
+        }
+        .suggestion-item:hover, .suggestion-item.highlighted {
+            background-color: #e5e7eb;
+        }
+        .dark .suggestion-item:hover, .dark .suggestion-item.highlighted {
+            background-color: #374151;
+        }
+    </style>
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+    <div class="min-h-full">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow">
+            <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <h1 class="text-2xl font-bold tracking-tight">{{ settings.app_title }}</h1>
+                <div class="flex items-center gap-4">
+                    {% if user and user.role == 'admin' %}
+                    <!-- Admin link (admin only) -->
+                    <a href="/admin"
+                       class="text-sm text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1"
+                       title="Admin">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Admin
+                    </a>
+                    <!-- Manage Relations link (admin only) -->
+                    <a href="/relations"
+                       class="text-sm text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1"
+                       title="Manage Relations">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                        Relations
+                    </a>
+                    {% endif %}
+                    <!-- Dark mode toggle -->
+                    <button id="theme-toggle"
+                            class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                            title="Toggle dark mode">
+                        <svg id="theme-icon-light" class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
+                        </svg>
+                        <svg id="theme-icon-dark" class="w-5 h-5 block dark:hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                        </svg>
+                    </button>
+                    <!-- Auth status -->
+                    <div id="auth-banner" hx-get="/auth/status" hx-trigger="load">
+                        {% include "partials/auth_banner.html" %}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main content -->
+        <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+            <!-- Controls form -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
+                <form id="controls-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Schema selector -->
+                        <div>
+                            <label for="schema" class="block text-sm font-medium mb-1">Schema</label>
+                            <select id="schema" name="schema"
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    onchange="loadTables()">
+                                <option value="">Select schema...</option>
+                            </select>
+                        </div>
+
+                        <!-- Table selector -->
+                        <div>
+                            <label for="table" class="block text-sm font-medium mb-1">Table</label>
+                            <select id="table" name="table"
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    onchange="loadTableData()">
+                                <option value="">Select table...</option>
+                            </select>
+                        </div>
+
+                        <!-- Action selector -->
+                        <div>
+                            <label for="action" class="block text-sm font-medium mb-1">Action</label>
+                            <select id="action" name="action"
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    onchange="handleActionChange()">
+                                <option value="select">SELECT</option>
+                                {% if user and user.role in ['editor', 'admin'] %}
+                                <option value="insert">INSERT</option>
+                                {% endif %}
+                                <option value="export">EXPORT CSV</option>
+                            </select>
+                        </div>
+
+                        <!-- Limit selector -->
+                        <div>
+                            <label for="limit" class="block text-sm font-medium mb-1">Limit</label>
+                            <select id="limit" name="limit"
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    onchange="loadTableData()">
+                                <option value="10">10</option>
+                                <option value="100" selected>100</option>
+                                <option value="1000">1000</option>
+                                <option value="0">All</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- WHERE clause -->
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <label for="where" class="block text-sm font-medium mb-1">WHERE</label>
+                            <input type="text" id="where" name="where" placeholder="e.g., name LIKE '%smith%'"
+                                   class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <button type="button" onclick="loadTableData()"
+                                    class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                Apply
+                            </button>
+                            <button type="button" onclick="clearWhere()"
+                                    class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Data display area -->
+            <div class="relative">
+                <!-- Loading overlay -->
+                <div id="loading-overlay" class="hidden absolute inset-0 bg-white/75 dark:bg-gray-800/75 z-10 flex items-center justify-center rounded-lg">
+                    <div class="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                        <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Loading...</span>
+                    </div>
+                </div>
+                <div id="data-container" class="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden">
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        Select a schema and table to view data
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form modal -->
+            <div id="form-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white dark:bg-gray-800">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="modal-title" class="text-lg font-medium">Form</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="modal-content"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        // Check for saved theme preference or default to system preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+        });
+
+        // Load schemas on page load and handle URL parameters
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlSchema = urlParams.get('schema');
+            const urlTable = urlParams.get('table');
+            const urlWhere = urlParams.get('where');
+            const urlLimit = urlParams.get('limit');
+            const urlAction = urlParams.get('action');
+            const urlOrder = urlParams.get('order');
+
+            // Load schemas
+            const response = await fetch('/api/schemas');
+            const schemasHtml = await response.text();
+            document.getElementById('schema').innerHTML = '<option value="">Select schema...</option>' + schemasHtml;
+
+            // If schema in URL, select it and load tables
+            if (urlSchema) {
+                document.getElementById('schema').value = urlSchema;
+                // Don't call loadTables() directly as it clears filters - just load the tables HTML
+                const tablesResponse = await fetch(`/api/tables/${urlSchema}`);
+                const tablesHtml = await tablesResponse.text();
+                document.getElementById('table').innerHTML = '<option value="">Select table...</option>' + tablesHtml;
+
+                // If table in URL, select it
+                if (urlTable) {
+                    document.getElementById('table').value = urlTable;
+                }
+            }
+
+            // Set other URL params
+            if (urlWhere) {
+                document.getElementById('where').value = urlWhere;
+            }
+            if (urlLimit) {
+                document.getElementById('limit').value = urlLimit;
+            }
+            if (urlAction) {
+                document.getElementById('action').value = urlAction;
+            }
+            if (urlOrder) {
+                const orderInput = document.getElementById('order') || createHiddenInput('order');
+                orderInput.value = urlOrder;
+            }
+
+            // If we have schema and table, load the data
+            if (urlSchema && urlTable) {
+                // Set last loaded values so we don't re-fetch preferences from URL params
+                lastLoadedSchema = urlSchema;
+                lastLoadedTable = urlTable;
+                loadTableData();
+            }
+        });
+
+        // Load tables when schema changes
+        async function loadTables() {
+            const schema = document.getElementById('schema').value;
+            const tableSelect = document.getElementById('table');
+
+            // Clear filters and data grid when schema changes
+            clearFilters();
+            document.getElementById('data-container').innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-400">Select a schema and table to view data</div>';
+
+            if (!schema) {
+                tableSelect.innerHTML = '<option value="">Select table...</option>';
+                updateUrl();
+                return;
+            }
+
+            const response = await fetch(`/api/tables/${schema}`);
+            const tablesHtml = await response.text();
+            tableSelect.innerHTML = '<option value="">Select table...</option>' + tablesHtml;
+            updateUrl();
+        }
+
+        // Clear all filter fields and reset to defaults
+        function clearFilters() {
+            document.getElementById('where').value = '';
+            document.getElementById('limit').value = '100';
+            const orderInput = document.getElementById('order');
+            if (orderInput) orderInput.value = '';
+        }
+
+        // Loading overlay helpers
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+
+        // Update URL to reflect current state (enables refresh/bookmarking)
+        function updateUrl() {
+            const params = new URLSearchParams();
+
+            const schema = document.getElementById('schema').value;
+            const table = document.getElementById('table').value;
+            const where = document.getElementById('where').value;
+            const limit = document.getElementById('limit').value;
+            const action = document.getElementById('action').value;
+            const orderInput = document.getElementById('order');
+            const order = orderInput ? orderInput.value : '';
+
+            if (schema) params.set('schema', schema);
+            if (table) params.set('table', table);
+            if (where) params.set('where', where);
+            if (limit && limit !== '100') params.set('limit', limit);
+            if (order) params.set('order', order);
+            if (action && action !== 'select') params.set('action', action);
+
+            const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+            history.replaceState(null, '', newUrl);
+        }
+
+        // Track last loaded table to detect changes
+        let lastLoadedSchema = null;
+        let lastLoadedTable = null;
+
+        // Load table data
+        async function loadTableData() {
+            const schema = document.getElementById('schema').value;
+            const table = document.getElementById('table').value;
+            const action = document.getElementById('action').value;
+
+            if (!schema || !table) return;
+
+            if (action === 'export') {
+                exportCsv();
+                return;
+            }
+
+            if (action === 'insert') {
+                showInsertForm();
+                return;
+            }
+
+            // If table changed, fetch and apply saved preferences
+            if (schema !== lastLoadedSchema || table !== lastLoadedTable) {
+                await fetchAndApplyPreferences(schema, table);
+                lastLoadedSchema = schema;
+                lastLoadedTable = table;
+            }
+
+            const where = document.getElementById('where').value;
+            const limit = document.getElementById('limit').value;
+            const orderInput = document.getElementById('order');
+            const order = orderInput ? orderInput.value : '';
+
+            const params = new URLSearchParams();
+            params.append('where', where);  // Always send, even if empty, to clear cache
+            params.append('limit', limit);
+            if (order) params.append('order', order);
+
+            showLoading();
+            htmx.ajax('GET', `/data/${schema}/${table}?${params}`, '#data-container');
+            updateUrl();
+        }
+
+        // Fetch saved preferences for a table and apply to form fields
+        async function fetchAndApplyPreferences(schema, table) {
+            try {
+                const response = await fetch(`/api/preferences/${schema}/${table}`);
+                const prefs = await response.json();
+
+                document.getElementById('where').value = prefs.where || '';
+                document.getElementById('limit').value = prefs.limit || '100';
+
+                const orderInput = document.getElementById('order');
+                if (orderInput) orderInput.value = prefs.order || '';
+            } catch (e) {
+                // If preferences fetch fails, just use defaults
+                console.error('Failed to fetch preferences:', e);
+            }
+        }
+
+        // Hide loading when HTMX request to data-container completes
+        document.body.addEventListener('htmx:afterSwap', (e) => {
+            if (e.detail.target.id === 'data-container') {
+                hideLoading();
+            }
+        });
+
+        // Clear WHERE and reload
+        function clearWhere() {
+            document.getElementById('where').value = '';
+            loadTableData();
+        }
+
+        // Handle action change
+        function handleActionChange() {
+            const action = document.getElementById('action').value;
+            if (action === 'insert') {
+                showInsertForm();
+            } else if (action === 'export') {
+                exportCsv();
+            } else {
+                loadTableData();
+            }
+        }
+
+        // Show insert form
+        function showInsertForm() {
+            const schema = document.getElementById('schema').value;
+            const table = document.getElementById('table').value;
+
+            if (!schema || !table) {
+                alert('Please select a schema and table first');
+                return;
+            }
+
+            document.getElementById('modal-title').textContent = `Insert into ${schema}.${table}`;
+            htmx.ajax('GET', `/form/${schema}/${table}`, '#modal-content');
+            document.getElementById('form-modal').classList.remove('hidden');
+        }
+
+        // Show edit form
+        function editRow(pkParams) {
+            const schema = document.getElementById('schema').value;
+            const table = document.getElementById('table').value;
+
+            document.getElementById('modal-title').textContent = `Edit row in ${schema}.${table}`;
+            htmx.ajax('GET', `/form/${schema}/${table}/edit?${pkParams}`, '#modal-content');
+            document.getElementById('form-modal').classList.remove('hidden');
+        }
+
+        // Copy row (insert with existing data)
+        function copyRow(pkParams) {
+            const schema = document.getElementById('schema').value;
+            const table = document.getElementById('table').value;
+
+            document.getElementById('modal-title').textContent = `Copy row in ${schema}.${table}`;
+            // Fetch edit form but we'll change action to insert
+            htmx.ajax('GET', `/form/${schema}/${table}/edit?${pkParams}`, {
+                target: '#modal-content',
+                handler: function(elt, response) {
+                    // Modify form for insert action
+                    const form = document.querySelector('#modal-content form');
+                    if (form) {
+                        form.setAttribute('hx-post', form.getAttribute('hx-put').replace('hx-put', ''));
+                        form.removeAttribute('hx-put');
+                    }
+                }
+            });
+            document.getElementById('form-modal').classList.remove('hidden');
+        }
+
+        // Delete row
+        function deleteRow(pkParams) {
+            if (!confirm('Are you sure you want to delete this row?')) return;
+
+            const schema = document.getElementById('schema').value;
+            const table = document.getElementById('table').value;
+
+            // Build form data from pk params
+            const formData = new FormData();
+            const params = new URLSearchParams(pkParams);
+            params.forEach((value, key) => {
+                formData.append('_pk_' + key, value);
+            });
+
+            fetch(`/data/${schema}/${table}`, {
+                method: 'DELETE',
+                body: formData
+            }).then(response => response.text())
+              .then(html => {
+                  document.getElementById('data-container').innerHTML = html;
+                  loadTableData();
+              });
+        }
+
+        // Export CSV
+        function exportCsv() {
+            const schema = document.getElementById('schema').value;
+            const table = document.getElementById('table').value;
+
+            if (!schema || !table) {
+                alert('Please select a schema and table first');
+                return;
+            }
+
+            const where = document.getElementById('where').value;
+            const limit = document.getElementById('limit').value;
+
+            const params = new URLSearchParams();
+            if (where) params.append('where', where);
+            if (limit && limit !== '0') params.append('limit', limit);
+
+            window.location.href = `/export/${schema}/${table}?${params}`;
+
+            // Reset action to SELECT
+            document.getElementById('action').value = 'select';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('form-modal').classList.add('hidden');
+            document.getElementById('modal-content').innerHTML = '';
+        }
+
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Close modal on backdrop click
+        document.getElementById('form-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'form-modal') closeModal();
+        });
+
+        // Handle form success - close modal and refresh data
+        document.body.addEventListener('htmx:afterSwap', (e) => {
+            if (e.detail.target.id === 'modal-content' && e.detail.xhr.responseText.includes('bg-green-50')) {
+                setTimeout(() => {
+                    closeModal();
+                    loadTableData();
+                }, 1000);
+            }
+        });
+
+        // Sort table by column
+        function sortBy(column) {
+            const orderInput = document.getElementById('order') || createHiddenInput('order');
+            const currentOrder = orderInput.value;
+
+            if (currentOrder === column || currentOrder === column + ' ASC') {
+                // Currently ASC, switch to DESC
+                orderInput.value = column + ' DESC';
+            } else if (currentOrder === column + ' DESC') {
+                // Currently DESC, switch back to ASC
+                orderInput.value = column;
+            } else {
+                // Different column or no sort, set to ASC
+                orderInput.value = column;
+            }
+
+            loadTableData();
+        }
+
+        // Get current sort column and direction
+        function getCurrentSort() {
+            const orderInput = document.getElementById('order');
+            if (!orderInput || !orderInput.value) return { column: null, direction: null };
+
+            const order = orderInput.value.trim();
+            if (order.endsWith(' DESC')) {
+                return { column: order.replace(' DESC', ''), direction: 'desc' };
+            } else if (order.endsWith(' ASC')) {
+                return { column: order.replace(' ASC', ''), direction: 'asc' };
+            } else {
+                return { column: order, direction: 'asc' };
+            }
+        }
+
+        function createHiddenInput(name) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.id = name;
+            input.name = name;
+            document.getElementById('controls-form').appendChild(input);
+            return input;
+        }
+
+        // Suggestion handling for relational fields
+        let currentSuggestionIndex = -1;
+        let suggestionInput = null;
+
+        function showSuggestions(inputElement, column) {
+            suggestionInput = inputElement;
+            const schema = document.getElementById('schema').value;
+            const table = document.getElementById('table').value;
+            const query = inputElement.value;
+
+            const suggestionsDiv = document.getElementById(`suggestions-${column}`);
+            if (!suggestionsDiv) return;
+
+            fetch(`/api/suggest/${schema}/${table}/${column}?q=${encodeURIComponent(query)}`)
+                .then(response => response.text())
+                .then(html => {
+                    suggestionsDiv.innerHTML = html;
+                    suggestionsDiv.classList.remove('hidden');
+                    currentSuggestionIndex = -1;
+                });
+        }
+
+        function selectSuggestion(id, display, column) {
+            const input = document.querySelector(`input[name="${column}"]`);
+            if (input) {
+                input.value = id;
+            }
+            const suggestionsDiv = document.getElementById(`suggestions-${column}`);
+            if (suggestionsDiv) {
+                suggestionsDiv.classList.add('hidden');
+            }
+        }
+
+        function handleSuggestionKeydown(event, column) {
+            const suggestionsDiv = document.getElementById(`suggestions-${column}`);
+            if (!suggestionsDiv || suggestionsDiv.classList.contains('hidden')) return;
+
+            const items = suggestionsDiv.querySelectorAll('.suggestion-item');
+            if (items.length === 0) return;
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                currentSuggestionIndex = Math.min(currentSuggestionIndex + 1, items.length - 1);
+                highlightSuggestion(items);
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                currentSuggestionIndex = Math.max(currentSuggestionIndex - 1, 0);
+                highlightSuggestion(items);
+            } else if (event.key === 'Enter' && currentSuggestionIndex >= 0) {
+                event.preventDefault();
+                items[currentSuggestionIndex].click();
+            } else if (event.key === 'Escape') {
+                suggestionsDiv.classList.add('hidden');
+            }
+        }
+
+        function highlightSuggestion(items) {
+            items.forEach((item, index) => {
+                item.classList.toggle('highlighted', index === currentSuggestionIndex);
+            });
+        }
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.suggestion-container')) {
+                document.querySelectorAll('[id^="suggestions-"]').forEach(div => {
+                    div.classList.add('hidden');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

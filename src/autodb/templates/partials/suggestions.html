@@ -1,0 +1,14 @@
+{% if suggestions %}
+{% for item in suggestions %}
+<div class="suggestion-item px-3 py-2 cursor-pointer text-sm"
+     onclick="selectSuggestion('{{ item.id }}', '{{ item.display }}', '{{ column }}')">
+    <span class="text-gray-500 dark:text-gray-400">{{ item.id }}</span>
+    <span class="mx-2">-</span>
+    <span>{{ item.display }}</span>
+</div>
+{% endfor %}
+{% else %}
+<div class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+    No suggestions found
+</div>
+{% endif %}
