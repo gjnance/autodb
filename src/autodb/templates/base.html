@@ -98,7 +98,7 @@
             <!-- Controls form -->
             <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 mb-6">
                 <form id="controls-form" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <!-- Schema selector -->
                         <div>
                             <label for="schema" class="block text-sm font-medium mb-1">Schema</label>
@@ -116,20 +116,6 @@
                                     class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     onchange="loadTableData()">
                                 <option value="">Select table...</option>
-                            </select>
-                        </div>
-
-                        <!-- Action selector -->
-                        <div>
-                            <label for="action" class="block text-sm font-medium mb-1">Action</label>
-                            <select id="action" name="action"
-                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                    onchange="handleActionChange()">
-                                <option value="select">SELECT</option>
-                                {% if user and user.role in ['editor', 'admin'] %}
-                                <option value="insert">INSERT</option>
-                                {% endif %}
-                                <option value="export">EXPORT CSV</option>
                             </select>
                         </div>
 
@@ -166,6 +152,24 @@
                         </div>
                     </div>
                 </form>
+            </div>
+
+            <!-- Action buttons -->
+            <div id="action-buttons" class="hidden flex items-center justify-between mb-6">
+                <div>
+                    {% if user and user.role in ['editor', 'admin'] %}
+                    <button type="button" onclick="showInsertForm()"
+                            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm font-medium">
+                        + New
+                    </button>
+                    {% endif %}
+                </div>
+                <div>
+                    <button type="button" onclick="exportCsv()"
+                            class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 text-sm font-medium">
+                        Export CSV
+                    </button>
+                </div>
             </div>
 
             <!-- Data display area -->
@@ -226,7 +230,6 @@
             const urlTable = urlParams.get('table');
             const urlWhere = urlParams.get('where');
             const urlLimit = urlParams.get('limit');
-            const urlAction = urlParams.get('action');
             const urlOrder = urlParams.get('order');
 
             // Load schemas
@@ -255,9 +258,6 @@
             if (urlLimit) {
                 document.getElementById('limit').value = urlLimit;
             }
-            if (urlAction) {
-                document.getElementById('action').value = urlAction;
-            }
             if (urlOrder) {
                 const orderInput = document.getElementById('order') || createHiddenInput('order');
                 orderInput.value = urlOrder;
@@ -277,8 +277,9 @@
             const schema = document.getElementById('schema').value;
             const tableSelect = document.getElementById('table');
 
-            // Clear filters and data grid when schema changes
+            // Clear filters, data grid, and action buttons when schema changes
             clearFilters();
+            document.getElementById('action-buttons').classList.add('hidden');
             document.getElementById('data-container').innerHTML = '<div class="p-8 text-center text-gray-500 dark:text-gray-400">Select a schema and table to view data</div>';
 
             if (!schema) {
@@ -318,7 +319,6 @@
             const table = document.getElementById('table').value;
             const where = document.getElementById('where').value;
             const limit = document.getElementById('limit').value;
-            const action = document.getElementById('action').value;
             const orderInput = document.getElementById('order');
             const order = orderInput ? orderInput.value : '';
 
@@ -327,7 +327,6 @@
             if (where) params.set('where', where);
             if (limit && limit !== '100') params.set('limit', limit);
             if (order) params.set('order', order);
-            if (action && action !== 'select') params.set('action', action);
 
             const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
             history.replaceState(null, '', newUrl);
@@ -341,19 +340,11 @@
         async function loadTableData() {
             const schema = document.getElementById('schema').value;
             const table = document.getElementById('table').value;
-            const action = document.getElementById('action').value;
 
             if (!schema || !table) return;
 
-            if (action === 'export') {
-                exportCsv();
-                return;
-            }
-
-            if (action === 'insert') {
-                showInsertForm();
-                return;
-            }
+            // Show action buttons when a table is selected
+            document.getElementById('action-buttons').classList.remove('hidden');
 
             // If table changed, fetch and apply saved preferences
             if (schema !== lastLoadedSchema || table !== lastLoadedTable) {
@@ -405,18 +396,6 @@
         function clearWhere() {
             document.getElementById('where').value = '';
             loadTableData();
-        }
-
-        // Handle action change
-        function handleActionChange() {
-            const action = document.getElementById('action').value;
-            if (action === 'insert') {
-                showInsertForm();
-            } else if (action === 'export') {
-                exportCsv();
-            } else {
-                loadTableData();
-            }
         }
 
         // Show insert form
@@ -507,9 +486,6 @@
             if (limit && limit !== '0') params.append('limit', limit);
 
             window.location.href = `/export/${schema}/${table}?${params}`;
-
-            // Reset action to SELECT
-            document.getElementById('action').value = 'select';
         }
 
         // Close modal

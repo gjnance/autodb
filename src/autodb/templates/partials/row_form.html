@@ -4,7 +4,7 @@
       class="space-y-4">
 
     {% for column in table_info.columns %}
-    <div class="{% if column.name in relations %}suggestion-container relative{% endif %}">
+    <div>
         <label for="{{ column.name }}" class="block text-sm font-medium mb-1 {% if column.is_required and action == 'insert' %}text-red-600 dark:text-red-400{% endif %}">
             {{ column.name }}
             {% if column.is_primary_key %}
@@ -58,20 +58,21 @@
                value="{{ row[column.name] | string if row and row[column.name] else '' }}"
                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
 
-        {% elif column.name in relations %}
-        {# Relational field with auto-complete #}
-        <input type="text"
-               name="{{ column.name }}"
-               value="{{ row[column.name] if row and row[column.name] else '' }}"
-               autocomplete="off"
-               oninput="showSuggestions(this, '{{ column.name }}')"
-               onkeydown="handleSuggestionKeydown(event, '{{ column.name }}')"
-               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-        <div id="suggestions-{{ column.name }}"
-             class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 overflow-y-auto">
-        </div>
+        {% elif column.name in relations and column.name in relation_options %}
+        {# Relational field as dropdown #}
+        <select name="{{ column.name }}"
+                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            {% if column.is_nullable or action == 'insert' %}
+            <option value="">-- Select --</option>
+            {% endif %}
+            {% for id_val, display_val in relation_options[column.name] %}
+            <option value="{{ id_val }}" {% if row and row[column.name] is not none and row[column.name] | string == id_val | string %}selected{% endif %}>
+                {{ display_val }} ({{ id_val }})
+            </option>
+            {% endfor %}
+        </select>
         <p class="text-xs text-gray-500 mt-1">
-            Related to: {{ relations[column.name].related_table }}.{{ relations[column.name].display_column }}
+            Related to: {{ relations[column.name].map_table }}.{{ relations[column.name].map_display }}
         </p>
 
         {% else %}

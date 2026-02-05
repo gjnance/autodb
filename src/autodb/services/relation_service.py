@@ -80,6 +80,22 @@ class RelationService:
             )
         return None
 
+    async def fetch_all_options(
+        self, rule: RelationRule
+    ) -> list[tuple[Any, str]]:
+        """Fetch all (id, display) pairs from a relation's lookup table.
+
+        Returns:
+            List of (map_column_value, map_display_value) tuples, sorted by display.
+        """
+        query = text(f"""
+            SELECT {rule.map_column}, {rule.map_display}
+            FROM {rule.map_schema}.{rule.map_table}
+            ORDER BY {rule.map_display}
+        """)
+        result = await self.db.execute(query)
+        return [(row[0], row[1]) for row in result.fetchall()]
+
     async def fetch_display_values(
         self, rule: RelationRule, ids: list[Any]
     ) -> dict[Any, str]:

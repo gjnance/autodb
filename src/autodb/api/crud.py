@@ -24,7 +24,7 @@ def _check_write_permission(user: User | None) -> None:
         raise HTTPException(status_code=401, detail="Authentication required for this action")
 
     role = Role(user.role)
-    if role not in (Role.USER, Role.ADMIN):
+    if role not in (Role.EDITOR, Role.ADMIN):
         raise HTTPException(status_code=403, detail="Write permission required")
 
 
@@ -124,12 +124,18 @@ async def get_insert_form(
     relation_service = RelationService(db)
     relations = await relation_service.get_relations_for_table(schema, table)
 
+    # Fetch dropdown options for each relational column
+    relation_options: dict[str, list[tuple]] = {}
+    for col_name, rule in relations.items():
+        relation_options[col_name] = await relation_service.fetch_all_options(rule)
+
     return templates.TemplateResponse(
         request,
         "partials/row_form.html",
         {
             "table_info": table_info,
             "relations": relations,
+            "relation_options": relation_options,
             "row": None,
             "action": "insert",
         },
@@ -178,12 +184,18 @@ async def get_edit_form(
     relation_service = RelationService(db)
     relations = await relation_service.get_relations_for_table(schema, table)
 
+    # Fetch dropdown options for each relational column
+    relation_options: dict[str, list[tuple]] = {}
+    for col_name, rule in relations.items():
+        relation_options[col_name] = await relation_service.fetch_all_options(rule)
+
     return templates.TemplateResponse(
         request,
         "partials/row_form.html",
         {
             "table_info": table_info,
             "relations": relations,
+            "relation_options": relation_options,
             "row": row,
             "action": "update",
         },
